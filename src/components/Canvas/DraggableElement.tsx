@@ -81,23 +81,20 @@ export function DraggableElement({ element }: DraggableElementProps) {
         }
       }}
       style={{ zIndex: isSelected ? 60 : 50, touchAction: 'none' }}
-      enableResizing={
-        isSelected
-          ? {
-              topRight: true,
-              bottomRight: true,
-              bottomLeft: true,
-              topLeft: true,
-            }
-          : false
-      }
+      enableResizing={isSelected}
       resizeHandleStyles={
         isSelected
           ? {
-              topRight: { width: 20, height: 20, top: 0, right: 0, cursor: 'nesw-resize', background: '#FF4500', borderRadius: '50%', border: '2px solid white', zIndex: 70 },
-              bottomRight: { width: 20, height: 20, right: 0, bottom: 0, cursor: 'nwse-resize', background: '#FF4500', borderRadius: '50%', border: '2px solid white', zIndex: 70 },
-              bottomLeft: { width: 20, height: 20, left: 0, bottom: 0, cursor: 'nesw-resize', background: '#FF4500', borderRadius: '50%', border: '2px solid white', zIndex: 70 },
-              topLeft: { width: 20, height: 20, top: 0, left: 0, cursor: 'nwse-resize', background: '#FF4500', borderRadius: '50%', border: '2px solid white', zIndex: 70 },
+              bottomRight: {
+                width: 20,
+                height: 20,
+                right: -10,
+                bottom: -10,
+                cursor: 'nwse-resize',
+                background: '#FF4500',
+                borderRadius: '50%',
+                border: '2px solid white',
+              },
             }
           : undefined
       }

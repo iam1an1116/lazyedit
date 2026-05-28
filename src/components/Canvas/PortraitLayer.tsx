@@ -100,7 +100,7 @@ export function PortraitLayer() {
 
   if (!portraitUrl) {
     return (
-      <div className="absolute inset-0 z-30 pointer-events-none">
+      <div className="absolute inset-0 z-30 pointer-events-none overflow-hidden rounded-2xl">
         <span className="absolute top-12 left-4 text-[10px] uppercase tracking-widest text-black/30 font-mono">
           z-30 / subject
         </span>
@@ -111,7 +111,7 @@ export function PortraitLayer() {
   const filterCSS = portraitFilter === 'glitch' ? 'none' : getFilterCSS(portraitFilter);
 
   return (
-    <div ref={containerRef} className="absolute inset-0 z-30 pointer-events-none">
+    <div ref={containerRef} className="absolute inset-0 z-30 pointer-events-none overflow-hidden rounded-2xl">
       {strokeStyle === 'solid' && (
         <svg width="0" height="0" style={{ position: 'absolute' }}>
           <defs>
