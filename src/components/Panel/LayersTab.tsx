@@ -95,7 +95,7 @@ export function LayersTab() {
     const cw = container?.clientWidth || 320;
     const ch = container?.clientHeight || 427;
 
-    // Much smaller base: shorter side / 12, scaled down further by count
+    // 基准尺寸：短边 / 12，再按数量缩放
     const refSize = imageDimensions
       ? Math.min(imageDimensions.width, imageDimensions.height) / 12
       : 60;
@@ -103,13 +103,43 @@ export function LayersTab() {
 
     const shapeTypes: ShapeType[] = ['rectangle', 'circle', 'triangle'];
 
-    // Grid-based scatter: divide canvas into cells, assign one element per cell
+    // 人像区域：画布中心 60%
+    const portraitMargin = 0.2;
+    const px = cw * portraitMargin;
+    const py = ch * portraitMargin;
+    const pw = cw * (1 - 2 * portraitMargin);
+    const ph = ch * (1 - 2 * portraitMargin);
+
+    // 内缩区域：让人像区域内的元素不会贴边（留 15% 余量）
+    const innerPad = 0.15;
+    const ix = px + pw * innerPad;
+    const iy = py + ph * innerPad;
+    const iw = pw * (1 - 2 * innerPad);
+    const ih = ph * (1 - 2 * innerPad);
+
+    // 外部区域：画布边缘 20% 范围
+    const outerMargin = 0.05;
+    const outerW = cw * outerMargin;
+    const outerH = ch * outerMargin;
+
+    // 至少 60% 的元素在人像区域内
+    const portraitCount = Math.max(1, Math.round(randomCount * 0.6));
+    const outerCount = randomCount - portraitCount;
+
+    // 标记哪些元素在人像区域
+    const isPortraitArr = Array(portraitCount).fill(true).concat(Array(outerCount).fill(false));
+    // 打乱顺序
+    for (let i = isPortraitArr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [isPortraitArr[i], isPortraitArr[j]] = [isPortraitArr[j], isPortraitArr[i]];
+    }
+
+    // 网格分配
     const cols = Math.ceil(Math.sqrt(randomCount * (cw / ch)));
     const rows = Math.ceil(randomCount / cols);
     const cellW = cw / cols;
     const cellH = ch / rows;
 
-    // Build shuffled cell indices
     const cells = Array.from({ length: cols * rows }, (_, i) => i);
     for (let i = cells.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -117,24 +147,54 @@ export function LayersTab() {
     }
 
     for (let i = 0; i < randomCount; i++) {
+      const isPortrait = isPortraitArr[i];
       const cellIdx = cells[i];
       const col = cellIdx % cols;
       const row = Math.floor(cellIdx / cols);
 
-      // Size variation: 40% ~ 130% of base
+      // 大小：40% ~ 130%
       const sizeMultiplier = 0.4 + Math.random() * 0.9;
       const size = Math.round(baseSize * sizeMultiplier);
 
-      // Position within cell with jitter
-      const jitterX = (Math.random() - 0.5) * cellW * 0.6;
-      const jitterY = (Math.random() - 0.5) * cellH * 0.6;
-      const x = col * cellW + cellW / 2 - size / 2 + jitterX;
-      const y = row * cellH + cellH / 2 - size / 2 + jitterY;
+      let cx: number, cy: number, rotation: number;
 
-      // Clamp to canvas bounds
-      const cx = Math.max(0, Math.min(cw - size, x));
-      const cy = Math.max(0, Math.min(ch - size, y));
-      const rotation = Math.round((Math.random() - 0.5) * 60);
+      if (isPortrait) {
+        // 在人像内缩区域内随机位置
+        cx = ix + Math.random() * Math.max(0, iw - size);
+        cy = iy + Math.random() * Math.max(0, ih - size);
+        // 可以旋转 ±30°
+        rotation = Math.round((Math.random() - 0.5) * 60);
+      } else {
+        // 人像区域外：用网格定位 + 偏移到边缘
+        const baseX = col * cellW + cellW / 2 - size / 2;
+        const baseY = row * cellH + cellH / 2 - size / 2;
+        const jitterX = (Math.random() - 0.5) * cellW * 0.4;
+        const jitterY = (Math.random() - 0.5) * cellH * 0.4;
+        cx = baseX + jitterX;
+        cy = baseY + jitterY;
+
+        // 如果落在人像区域内，推到最近的边缘外
+        const elCenterX = cx + size / 2;
+        const elCenterY = cy + size / 2;
+        if (elCenterX > px && elCenterX < px + pw && elCenterY > py && elCenterY < py + ph) {
+          // 推到四条边中最近的一条
+          const distLeft = elCenterX - px;
+          const distRight = px + pw - elCenterX;
+          const distTop = elCenterY - py;
+          const distBottom = py + ph - elCenterY;
+          const minDist = Math.min(distLeft, distRight, distTop, distBottom);
+          if (minDist === distLeft) cx = px - size - outerW * Math.random();
+          else if (minDist === distRight) cx = px + pw + outerW * Math.random();
+          else if (minDist === distTop) cy = py - size - outerH * Math.random();
+          else cy = py + ph + outerH * Math.random();
+        }
+        // 不旋转
+        rotation = 0;
+      }
+
+      // 钳制到画布范围内
+      cx = Math.max(0, Math.min(cw - size, cx));
+      cy = Math.max(0, Math.min(ch - size, cy));
 
       const isText = Math.random() > 0.5;
 

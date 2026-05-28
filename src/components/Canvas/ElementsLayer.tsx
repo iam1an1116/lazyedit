@@ -10,8 +10,7 @@ export function ElementsLayer() {
   return (
     <div
       ref={containerRef}
-      className="absolute inset-0 z-20 overflow-hidden"
-      style={{ contain: 'layout style' }}
+      className="absolute inset-0 z-20"
       onClick={() => selectElement(null)}
     >
       {elements.map((el) => (

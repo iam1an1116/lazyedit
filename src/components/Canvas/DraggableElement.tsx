@@ -55,17 +55,19 @@ export function DraggableElement({ element }: DraggableElementProps) {
     >
       <div
         className={`relative w-full h-full group ${
-          isSelected ? 'ring-2 ring-canvas-accent ring-offset-2' : ''
+          isSelected ? 'ring-2 ring-canvas-accent' : ''
         }`}
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Delete button */}
         {isSelected && (
           <button
-            onClick={(e) => {
+            onPointerDown={(e) => {
               e.stopPropagation();
+              e.preventDefault();
               removeElement(element.id);
             }}
-            className="absolute top-0 right-0 z-50 w-5 h-5 bg-canvas-text text-white rounded-full flex items-center justify-center hover:bg-red-500 transition-colors translate-x-1/2 -translate-y-1/2"
+            className="absolute top-1 right-1 z-50 w-5 h-5 bg-canvas-text text-white rounded-full flex items-center justify-center hover:bg-red-500 transition-colors"
           >
             <X className="w-3 h-3" />
           </button>
