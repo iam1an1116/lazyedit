@@ -76,25 +76,25 @@ export function UploadTab() {
   return (
     <div className="space-y-4 animate-fade-in">
       <span className="text-xs font-medium text-canvas-muted block">当前画布底图</span>
-      <div className="p-4 bg-canvas-hover rounded-2xl flex items-center justify-between border border-canvas-border">
-        <div className="flex items-center space-x-3">
-          <div className="w-12 h-12 bg-canvas-border rounded-xl overflow-hidden flex items-center justify-center">
+      <div className="p-3 sm:p-4 bg-canvas-hover rounded-xl sm:rounded-2xl flex items-center justify-between border border-canvas-border gap-2">
+        <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
+          <div className="w-10 h-10 sm:w-12 sm:h-12 bg-canvas-border rounded-lg sm:rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center">
             {originalImageUrl ? (
               <img src={originalImageUrl} alt="" className="w-full h-full object-cover" />
             ) : (
               <ImageIcon className="w-5 h-5 text-canvas-muted" />
             )}
           </div>
-          <div>
-            <p className="text-xs font-medium truncate w-40">已上传图片</p>
-            <p className="text-[10px] text-canvas-muted">
+          <div className="min-w-0">
+            <p className="text-xs font-medium truncate">已上传图片</p>
+            <p className="text-[10px] text-canvas-muted truncate">
               {portraitUrl ? '已智能分层' : isRemoving ? '正在抠图...' : '等待处理'}
             </p>
           </div>
         </div>
         <button
           onClick={clearImage}
-          className="text-xs px-3 py-1.5 bg-white text-red-500 border border-canvas-border rounded-full hover:bg-red-50 transition-all flex items-center space-x-1"
+          className="flex-shrink-0 text-[11px] px-2 sm:px-3 py-1 sm:py-1.5 bg-white text-red-500 border border-canvas-border rounded-full hover:bg-red-50 transition-all flex items-center space-x-1"
         >
           <X className="w-3 h-3" />
           <span>移除</span>

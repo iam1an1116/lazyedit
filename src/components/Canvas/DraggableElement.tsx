@@ -65,7 +65,7 @@ export function DraggableElement({ element }: DraggableElementProps) {
               e.stopPropagation();
               removeElement(element.id);
             }}
-            className="absolute -top-3 -right-3 z-50 w-6 h-6 bg-canvas-text text-white rounded-full flex items-center justify-center hover:bg-red-500 transition-colors"
+            className="absolute top-0 right-0 z-50 w-5 h-5 bg-canvas-text text-white rounded-full flex items-center justify-center hover:bg-red-500 transition-colors translate-x-1/2 -translate-y-1/2"
           >
             <X className="w-3 h-3" />
           </button>

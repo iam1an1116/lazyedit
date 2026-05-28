@@ -14,12 +14,12 @@ export function CanvasArea() {
     : '3 / 4';
 
   return (
-    <div className="flex-1 flex items-center justify-center bg-white rounded-3xl border border-canvas-border shadow-sm p-8 min-h-[500px] lg:min-h-0 relative overflow-hidden">
+    <div className="flex-1 flex items-center justify-center bg-white rounded-2xl sm:rounded-3xl border border-canvas-border shadow-sm p-4 sm:p-6 lg:p-8 min-h-[300px] sm:min-h-[400px] lg:min-h-0 relative overflow-hidden">
       <div
         ref={containerRef}
         id="canvasContainer"
         className="relative w-full max-w-[420px] max-h-[calc(100vh-200px)] bg-canvas-border rounded-2xl shadow-xl overflow-hidden border border-[#D4D4D0]"
-        style={{ aspectRatio }}
+        style={{ aspectRatio, contain: 'layout size' }}
       >
         <BackgroundLayer />
         <ElementsLayer />

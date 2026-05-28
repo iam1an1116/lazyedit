@@ -33,6 +33,7 @@ interface EditorState {
   updateElement: (id: string, updates: Partial<CanvasElement>) => void;
   removeElement: (id: string) => void;
   selectElement: (id: string | null) => void;
+  resetElements: () => void;
 
   setStrokeStyle: (s: StrokeStyle) => void;
   setStrokeWidth: (w: number) => void;
@@ -122,6 +123,7 @@ export const useEditorStore = create<EditorState>((set) => ({
     })),
 
   selectElement: (id) => set({ selectedElementId: id }),
+  resetElements: () => set({ elements: [], selectedElementId: null }),
 
   setStrokeStyle: (s) => set({ strokeStyle: s }),
   setStrokeWidth: (w) => set({ strokeWidth: w }),

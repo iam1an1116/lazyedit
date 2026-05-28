@@ -88,35 +88,52 @@ export function LayersTab() {
   };
 
   const generateRandom = () => {
+    // 先清空已有元素
+    useEditorStore.getState().resetElements();
+
     const container = document.getElementById('canvasContainer');
     const cw = container?.clientWidth || 320;
     const ch = container?.clientHeight || 427;
 
-    // Base size from portrait dimensions (shorter side / 6 as reference)
+    // Much smaller base: shorter side / 12, scaled down further by count
     const refSize = imageDimensions
-      ? Math.min(imageDimensions.width, imageDimensions.height) / 6
-      : 120;
-    const baseSize = Math.max(16, refSize / Math.sqrt(randomCount));
+      ? Math.min(imageDimensions.width, imageDimensions.height) / 12
+      : 60;
+    const baseSize = Math.max(12, refSize / (1 + randomCount * 0.3));
 
     const shapeTypes: ShapeType[] = ['rectangle', 'circle', 'triangle'];
 
-    // Most elements placed behind the portrait (centered area)
-    const marginX = cw * 0.15;
-    const marginY = ch * 0.1;
-    const areaW = cw - marginX * 2;
-    const areaH = ch - marginY * 2;
+    // Grid-based scatter: divide canvas into cells, assign one element per cell
+    const cols = Math.ceil(Math.sqrt(randomCount * (cw / ch)));
+    const rows = Math.ceil(randomCount / cols);
+    const cellW = cw / cols;
+    const cellH = ch / rows;
+
+    // Build shuffled cell indices
+    const cells = Array.from({ length: cols * rows }, (_, i) => i);
+    for (let i = cells.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [cells[i], cells[j]] = [cells[j], cells[i]];
+    }
 
     for (let i = 0; i < randomCount; i++) {
-      const sizeMultiplier = 0.5 + Math.random();
+      const cellIdx = cells[i];
+      const col = cellIdx % cols;
+      const row = Math.floor(cellIdx / cols);
+
+      // Size variation: 40% ~ 130% of base
+      const sizeMultiplier = 0.4 + Math.random() * 0.9;
       const size = Math.round(baseSize * sizeMultiplier);
-      // 80% chance to place in centered portrait area, 20% anywhere
-      const useCenter = Math.random() < 0.8;
-      const x = useCenter
-        ? marginX + Math.random() * Math.max(0, areaW - size)
-        : Math.random() * Math.max(0, cw - size);
-      const y = useCenter
-        ? marginY + Math.random() * Math.max(0, areaH - size)
-        : Math.random() * Math.max(0, ch - size);
+
+      // Position within cell with jitter
+      const jitterX = (Math.random() - 0.5) * cellW * 0.6;
+      const jitterY = (Math.random() - 0.5) * cellH * 0.6;
+      const x = col * cellW + cellW / 2 - size / 2 + jitterX;
+      const y = row * cellH + cellH / 2 - size / 2 + jitterY;
+
+      // Clamp to canvas bounds
+      const cx = Math.max(0, Math.min(cw - size, x));
+      const cy = Math.max(0, Math.min(ch - size, y));
       const rotation = Math.round((Math.random() - 0.5) * 60);
 
       const isText = Math.random() > 0.5;
@@ -126,8 +143,8 @@ export function LayersTab() {
         const el: TextElement = {
           type: 'text',
           id: genId(),
-          x: Math.round(x),
-          y: Math.round(y),
+          x: Math.round(cx),
+          y: Math.round(cy),
           width: size * 2,
           height: size,
           content: randomLetters(),
@@ -142,8 +159,7 @@ export function LayersTab() {
         };
         addElement(el);
       } else {
-        // Larger shapes → more opaque; smaller shapes → fully opaque
-        const sizeRatio = size / (baseSize * 1.5); // 0 ~ 1
+        const sizeRatio = size / (baseSize * 1.3);
         const opacity = sizeRatio > 0.3 ? 0.3 + Math.random() * 0.4 : 1;
 
         const st = shapeTypes[Math.floor(Math.random() * shapeTypes.length)];
@@ -151,8 +167,8 @@ export function LayersTab() {
           type: 'shape',
           shapeType: st,
           id: genId(),
-          x: Math.round(x),
-          y: Math.round(y),
+          x: Math.round(cx),
+          y: Math.round(cy),
           width: size,
           height: size,
           color: randomHex(),
@@ -170,25 +186,25 @@ export function LayersTab() {
   return (
     <div className="space-y-4 animate-fade-in">
       <span className="text-xs font-medium text-canvas-muted block">在人像背后插入元素</span>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2 sm:gap-3">
         <button
           onClick={addText}
-          className="flex items-center justify-center space-x-2 p-4 bg-white border border-canvas-deep hover:border-canvas-text rounded-2xl transition-all group"
+          className="flex items-center justify-center space-x-1.5 sm:space-x-2 p-3 sm:p-4 bg-white border border-canvas-deep hover:border-canvas-text rounded-xl sm:rounded-2xl transition-all group"
         >
-          <Type className="w-4 h-4 text-canvas-muted group-hover:text-canvas-text" />
-          <span className="text-xs font-medium">置入排版文字</span>
+          <Type className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-canvas-muted group-hover:text-canvas-text" />
+          <span className="text-[11px] sm:text-xs font-medium">置入文字</span>
         </button>
         <button
           onClick={() => addShape()}
-          className="flex items-center justify-center space-x-2 p-4 bg-white border border-canvas-deep hover:border-canvas-text rounded-2xl transition-all group"
+          className="flex items-center justify-center space-x-1.5 sm:space-x-2 p-3 sm:p-4 bg-white border border-canvas-deep hover:border-canvas-text rounded-xl sm:rounded-2xl transition-all group"
         >
-          <Square className="w-4 h-4 text-canvas-muted group-hover:text-canvas-text" />
-          <span className="text-xs font-medium">置入几何形状</span>
+          <Square className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-canvas-muted group-hover:text-canvas-text" />
+          <span className="text-[11px] sm:text-xs font-medium">置入形状</span>
         </button>
       </div>
 
       {/* Random fill */}
-      <div className="p-4 bg-canvas-hover rounded-2xl border border-canvas-border space-y-3">
+      <div className="p-3 sm:p-4 bg-canvas-hover rounded-xl sm:rounded-2xl border border-canvas-border space-y-2 sm:space-y-3">
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium text-canvas-muted">随便塞一下</span>
           <Shuffle className="w-4 h-4 text-canvas-muted" />
