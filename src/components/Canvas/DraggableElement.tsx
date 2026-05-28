@@ -6,7 +6,6 @@ import { X, RotateCw } from 'lucide-react';
 
 interface DraggableElementProps {
   element: CanvasElement;
-  containerRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export function DraggableElement({ element }: DraggableElementProps) {
@@ -53,32 +52,60 @@ export function DraggableElement({ element }: DraggableElementProps) {
         e.stopPropagation();
         selectElement(element.id);
       }}
+      onClick={(e: React.MouseEvent) => {
+        e.stopPropagation();
+      }}
       onDragStop={(_e, d) => {
         updateElement(element.id, { x: d.x, y: d.y });
       }}
       onResizeStop={(_e, _direction, ref, _delta, position) => {
-        updateElement(element.id, {
-          width: parseInt(ref.style.width),
-          height: parseInt(ref.style.height),
-          x: position.x,
-          y: position.y,
-        });
+        const newW = parseInt(ref.style.width);
+        const newH = parseInt(ref.style.height);
+        if (element.type === 'text') {
+          const scale = Math.min(newW / element.width, newH / element.height);
+          updateElement(element.id, {
+            width: newW,
+            height: newH,
+            x: position.x,
+            y: position.y,
+            fontSize: Math.max(8, Math.round(element.fontSize * scale)),
+            strokeWidth: Math.max(0, Math.round(element.strokeWidth * scale)),
+          });
+        } else {
+          updateElement(element.id, {
+            width: newW,
+            height: newH,
+            x: position.x,
+            y: position.y,
+          });
+        }
       }}
-      style={{ zIndex: isSelected ? 60 : 50 }}
-      enableResizing={isSelected}
+      style={{ zIndex: isSelected ? 60 : 50, touchAction: 'none' }}
+      enableResizing={
+        isSelected
+          ? {
+              top: true,
+              right: true,
+              bottom: true,
+              left: true,
+              topRight: true,
+              bottomRight: true,
+              bottomLeft: true,
+              topLeft: true,
+            }
+          : false
+      }
       resizeHandleStyles={
         isSelected
           ? {
-              bottomRight: {
-                width: 10,
-                height: 10,
-                right: -5,
-                bottom: -5,
-                cursor: 'nwse-resize',
-                background: '#FF4500',
-                borderRadius: '50%',
-                border: '2px solid white',
-              },
+              top: { width: '100%', height: 12, top: -6, left: 0, cursor: 'ns-resize' },
+              right: { width: 12, height: '100%', top: 0, right: -6, cursor: 'ew-resize' },
+              bottom: { width: '100%', height: 12, bottom: -6, left: 0, cursor: 'ns-resize' },
+              left: { width: 12, height: '100%', top: 0, left: -6, cursor: 'ew-resize' },
+              topRight: { width: 14, height: 14, top: -7, right: -7, cursor: 'nesw-resize', background: '#FF4500', borderRadius: '50%', border: '2px solid white' },
+              bottomRight: { width: 14, height: 14, right: -7, bottom: -7, cursor: 'nwse-resize', background: '#FF4500', borderRadius: '50%', border: '2px solid white' },
+              bottomLeft: { width: 14, height: 14, left: -7, bottom: -7, cursor: 'nesw-resize', background: '#FF4500', borderRadius: '50%', border: '2px solid white' },
+              topLeft: { width: 14, height: 14, top: -7, left: -7, cursor: 'nwse-resize', background: '#FF4500', borderRadius: '50%', border: '2px solid white' },
             }
           : undefined
       }
@@ -107,7 +134,8 @@ export function DraggableElement({ element }: DraggableElementProps) {
         {isSelected && (
           <div
             onPointerDown={onRotateStart}
-            className="absolute -top-8 left-1/2 -translate-x-1/2 z-50 w-6 h-6 bg-white border-2 border-canvas-accent rounded-full flex items-center justify-center cursor-grab active:cursor-grabbing shadow-sm"
+            className="absolute -top-8 left-1/2 -translate-x-1/2 z-50 w-8 h-8 bg-white border-2 border-canvas-accent rounded-full flex items-center justify-center cursor-grab active:cursor-grabbing shadow-sm"
+            style={{ touchAction: 'none' }}
           >
             <RotateCw className="w-3 h-3 text-canvas-accent" />
           </div>

@@ -6,7 +6,6 @@ import {
   createStripesPattern,
   createStarsPattern,
   createLettersPattern,
-  renderRandomStroke,
 } from './patternStroke';
 
 interface ExportOptions {
@@ -18,7 +17,6 @@ interface ExportOptions {
   strokeStyle: StrokeStyle;
   strokeWidth: number;
   strokeColor: string;
-  strokeRandomColor: boolean;
   portraitFilter: PortraitFilter;
 }
 
@@ -35,7 +33,6 @@ export async function exportAsPNG(options: ExportOptions): Promise<void> {
     strokeStyle,
     strokeWidth,
     strokeColor,
-    strokeRandomColor,
     portraitFilter,
   } = options;
 
@@ -145,8 +142,6 @@ export async function exportAsPNG(options: ExportOptions): Promise<void> {
 
       if (strokeStyle === 'solid') {
         renderPatternStroke(strokeCanvas, portraitImg, sw, strokeColor);
-      } else if (strokeRandomColor) {
-        renderRandomStroke(strokeCanvas, portraitImg, sw, strokeStyle as 'dots' | 'stripes' | 'stars' | 'letters');
       } else {
         let strokeStyleValue: CanvasRenderingContext2D['strokeStyle'];
 

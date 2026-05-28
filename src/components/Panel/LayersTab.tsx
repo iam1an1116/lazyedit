@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Type, Square, Triangle, Star, Shuffle } from 'lucide-react';
 import { useEditorStore } from '../../store/editorStore';
 import { getPortraitBounds } from '../../utils/portraitBounds';
-import type { CanvasElement, TextElement, ShapeElement, ShapeType } from '../../types';
+import type { TextElement, ShapeElement, ShapeType } from '../../types';
 
 type RandomElementType = 'text' | 'rectangle' | 'circle' | 'triangle' | 'star';
 
@@ -118,7 +118,6 @@ export function LayersTab() {
     const autoSize = refSize / (1 + effectiveCount * 0.255);
     const baseSize = Math.max(12, autoSize * randomSize);
 
-    const shapeTypes: ShapeType[] = ['rectangle', 'circle', 'triangle', 'star'];
     const enabledShapes = enabledTypes.filter((t) => t !== 'text') as ShapeType[];
     const hasText = enabledTypes.includes('text');
 
