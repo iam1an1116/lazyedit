@@ -73,16 +73,16 @@ export function PortraitLayer() {
         let style: CanvasRenderingContext2D['strokeStyle'];
 
         if (strokeStyle === 'dots') {
-          const r = Math.max(2.5, strokeWidth * 0.28);
-          style = createDotsPattern(ctx, r, r * 2, strokeColor);
+          const r = Math.max(2, strokeWidth * 0.22);
+          style = createDotsPattern(ctx, r, r * 1.6, strokeColor);
         } else if (strokeStyle === 'stripes') {
           style = createStripesPattern(ctx, strokeWidth, 0, 45, strokeColor);
         } else if (strokeStyle === 'stars') {
-          const sz = Math.max(6, strokeWidth * 0.55);
-          style = createStarsPattern(ctx, sz, sz * 1.2, strokeColor);
+          const sz = Math.max(5, strokeWidth * 0.42);
+          style = createStarsPattern(ctx, sz, sz * 1.1, strokeColor);
         } else {
-          const sz = Math.max(6, strokeWidth * 0.6);
-          style = createLettersPattern(ctx, sz, sz * 1.2, strokeColor);
+          const sz = Math.max(5, strokeWidth * 0.42);
+          style = createLettersPattern(ctx, sz, sz * 1.1, strokeColor);
         }
 
         renderPatternStroke(canvas, img, strokeWidth, style);
