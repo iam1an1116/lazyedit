@@ -1,7 +1,8 @@
+import { useRef, useCallback } from 'react';
 import { Rnd } from 'react-rnd';
 import { useEditorStore } from '../../store/editorStore';
 import type { CanvasElement } from '../../types';
-import { X } from 'lucide-react';
+import { X, RotateCw } from 'lucide-react';
 
 interface DraggableElementProps {
   element: CanvasElement;
@@ -15,8 +16,36 @@ export function DraggableElement({ element }: DraggableElementProps) {
   const selectedId = useEditorStore((s) => s.selectedElementId);
   const isSelected = selectedId === element.id;
 
+  const rndRef = useRef<Rnd>(null);
+
+  // Rotation handle drag
+  const onRotateStart = useCallback((e: React.PointerEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    const rndEl = rndRef.current?.resizableElement?.current;
+    if (!rndEl) return;
+
+    const onMove = (ev: PointerEvent) => {
+      const rect = rndEl.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const angle = Math.atan2(ev.clientY - cy, ev.clientX - cx) * (180 / Math.PI) + 90;
+      updateElement(element.id, { rotation: Math.round(angle) });
+    };
+
+    const onUp = () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+    };
+
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+  }, [element.id, updateElement]);
+
   return (
     <Rnd
+      ref={rndRef}
       position={{ x: element.x, y: element.y }}
       size={{ width: element.width, height: element.height }}
       bounds="parent"
@@ -36,20 +65,22 @@ export function DraggableElement({ element }: DraggableElementProps) {
         });
       }}
       style={{ zIndex: isSelected ? 60 : 50 }}
-      enableResizing={true}
+      enableResizing={isSelected}
       resizeHandleStyles={
         isSelected
-          ? undefined
-          : {
-              bottom: { display: 'none' },
-              bottomLeft: { display: 'none' },
-              bottomRight: { display: 'none' },
-              left: { display: 'none' },
-              right: { display: 'none' },
-              top: { display: 'none' },
-              topLeft: { display: 'none' },
-              topRight: { display: 'none' },
+          ? {
+              bottomRight: {
+                width: 10,
+                height: 10,
+                right: -5,
+                bottom: -5,
+                cursor: 'nwse-resize',
+                background: '#FF4500',
+                borderRadius: '50%',
+                border: '2px solid white',
+              },
             }
+          : undefined
       }
       dragHandleClassName="drag-handle"
     >
@@ -57,7 +88,6 @@ export function DraggableElement({ element }: DraggableElementProps) {
         className={`relative w-full h-full group ${
           isSelected ? 'ring-2 ring-canvas-accent' : ''
         }`}
-        onClick={(e) => e.stopPropagation()}
       >
         {/* Delete button */}
         {isSelected && (
@@ -71,6 +101,16 @@ export function DraggableElement({ element }: DraggableElementProps) {
           >
             <X className="w-3 h-3" />
           </button>
+        )}
+
+        {/* Rotation handle */}
+        {isSelected && (
+          <div
+            onPointerDown={onRotateStart}
+            className="absolute -top-8 left-1/2 -translate-x-1/2 z-50 w-6 h-6 bg-white border-2 border-canvas-accent rounded-full flex items-center justify-center cursor-grab active:cursor-grabbing shadow-sm"
+          >
+            <RotateCw className="w-3 h-3 text-canvas-accent" />
+          </div>
         )}
 
         {/* Element content */}

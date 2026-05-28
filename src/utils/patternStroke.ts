@@ -131,8 +131,8 @@ function randomHex(): string {
 }
 
 /**
- * Render random-color stroke: same ring region as uniform mode,
- * but fill with a grid of individually-colored elements via clipping.
+ * Render random-color stroke: extract contour from dilated portrait,
+ * compute normals, place elements along the ring centerline with random colors.
  */
 export function renderRandomStroke(
   canvas: HTMLCanvasElement,
@@ -149,7 +149,7 @@ export function renderRandomStroke(
 
   const half = Math.ceil(strokeWidth / 2);
 
-  // Build dilated portrait (same method as renderPatternStroke)
+  // Build dilated portrait
   const dilatedCanvas = document.createElement('canvas');
   dilatedCanvas.width = W;
   dilatedCanvas.height = H;
@@ -162,60 +162,89 @@ export function renderRandomStroke(
     dCtx.drawImage(portraitImage, dx, dy, W, H);
   }
 
-  // Build ring (dilated minus original)
-  const ringCanvas = document.createElement('canvas');
-  ringCanvas.width = W;
-  ringCanvas.height = H;
-  const rCtx = ringCanvas.getContext('2d')!;
-  rCtx.drawImage(dilatedCanvas, 0, 0);
-  rCtx.globalCompositeOperation = 'destination-out';
-  rCtx.drawImage(portraitImage, 0, 0, W, H);
-  rCtx.globalCompositeOperation = 'source-over';
+  // Extract contour from dilated image
+  const imageData = dCtx.getImageData(0, 0, W, H);
+  const data = imageData.data;
+  const step = Math.max(1, Math.floor(Math.min(W, H) / 400));
+  const rawPoints: { x: number; y: number; nx: number; ny: number }[] = [];
 
-  // Draw ring onto main canvas to establish clip region
-  ctx.drawImage(ringCanvas, 0, 0);
-
-  // Clip to ring area, then fill with grid of random-colored elements
-  ctx.save();
-  ctx.clip();
-
-  // Element sizing: fit inside ring width
-  const elemSize = Math.max(4, strokeType === 'letters'
-    ? Math.min(strokeWidth * 0.7, strokeWidth)
-    : Math.min(strokeWidth * 0.5, strokeWidth));
-  const spacing = elemSize * 2;
-
-  // Draw grid of elements across canvas, clipped to ring
-  for (let y = 0; y < H; y += spacing) {
-    for (let x = 0; x < W; x += spacing) {
-      const cx = x + spacing / 2;
-      const cy = y + spacing / 2;
-      const color = randomHex();
-
-      if (strokeType === 'dots') {
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.arc(cx, cy, elemSize / 2, 0, Math.PI * 2);
-        ctx.fill();
-      } else if (strokeType === 'stars') {
-        drawStar(ctx, cx, cy, elemSize / 2, elemSize * 0.382 / 2, color);
-      } else if (strokeType === 'letters') {
-        const letter = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)];
-        ctx.fillStyle = color;
-        ctx.font = `bold ${elemSize}px sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(letter, cx, cy);
-      } else if (strokeType === 'stripes') {
-        ctx.save();
-        ctx.translate(cx, cy);
-        ctx.rotate((45 * Math.PI) / 180);
-        ctx.fillStyle = color;
-        ctx.fillRect(-elemSize / 2, -elemSize / 4, elemSize, elemSize / 2);
-        ctx.restore();
+  for (let y = step; y < H - step; y += step) {
+    for (let x = step; x < W - step; x += step) {
+      if (data[(y * W + x) * 4 + 3] < 128) continue;
+      const l = data[(y * W + (x - step)) * 4 + 3];
+      const r = data[(y * W + (x + step)) * 4 + 3];
+      const u = data[((y - step) * W + x) * 4 + 3];
+      const d = data[((y + step) * W + x) * 4 + 3];
+      if (l < 128 || r < 128 || u < 128 || d < 128) {
+        const dx = (r - l) / 255;
+        const dy = (d - u) / 255;
+        const len = Math.sqrt(dx * dx + dy * dy) || 1;
+        rawPoints.push({ x, y, nx: dx / len, ny: dy / len });
       }
     }
   }
 
-  ctx.restore();
+  if (rawPoints.length === 0) return;
+
+  // Element sizing: same as uniform mode
+  const elemSize = Math.max(4, strokeType === 'dots'
+    ? strokeWidth * 0.44
+    : strokeType === 'letters'
+    ? strokeWidth * 0.42
+    : strokeWidth * 0.42);
+
+  // Spacing: match uniform mode density (tile ≈ elemSize * 2)
+  const spacing = elemSize * 2;
+
+  // Sample evenly along contour with correct accumulation
+  const sampled: typeof rawPoints = [];
+  let acc = Infinity;
+
+  for (let i = 0; i < rawPoints.length; i++) {
+    if (sampled.length === 0) {
+      sampled.push(rawPoints[i]);
+      acc = 0;
+      continue;
+    }
+    const prev = rawPoints[i - 1];
+    const cur = rawPoints[i];
+    acc += Math.sqrt((cur.x - prev.x) ** 2 + (cur.y - prev.y) ** 2);
+    if (acc >= spacing) {
+      sampled.push(cur);
+      acc = 0;
+    }
+  }
+
+  // Draw elements along the contour, offset inward to ring centerline
+  const inset = half * 0.5;
+
+  for (const pt of sampled) {
+    // Offset toward portrait interior (opposite of outward normal)
+    const ex = pt.x - pt.nx * inset;
+    const ey = pt.y - pt.ny * inset;
+    const color = randomHex();
+
+    if (strokeType === 'dots') {
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.arc(ex, ey, elemSize / 2, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (strokeType === 'stars') {
+      drawStar(ctx, ex, ey, elemSize / 2, elemSize * 0.382 / 2, color);
+    } else if (strokeType === 'letters') {
+      const letter = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)];
+      ctx.fillStyle = color;
+      ctx.font = `bold ${elemSize}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(letter, ex, ey);
+    } else if (strokeType === 'stripes') {
+      ctx.save();
+      ctx.translate(ex, ey);
+      ctx.rotate((45 * Math.PI) / 180);
+      ctx.fillStyle = color;
+      ctx.fillRect(-elemSize / 2, -elemSize / 4, elemSize, elemSize / 2);
+      ctx.restore();
+    }
+  }
 }
