@@ -18,6 +18,7 @@ export function useExport() {
         strokeStyle: store.strokeStyle,
         strokeWidth: store.strokeWidth,
         strokeColor: store.strokeColor,
+        strokeRandomColor: store.strokeRandomColor,
         portraitFilter: store.portraitFilter,
       });
     },

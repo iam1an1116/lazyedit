@@ -6,18 +6,23 @@ const strokeOptions: { key: StrokeStyle; label: string }[] = [
   { key: 'solid', label: '纯色块' },
   { key: 'dots', label: '复古波点' },
   { key: 'stripes', label: '波普条纹' },
+  { key: 'stars', label: '星星描边' },
+  { key: 'letters', label: '字母描边' },
 ];
 
 export function StrokeTab() {
   const strokeStyle = useEditorStore((s) => s.strokeStyle);
   const strokeWidth = useEditorStore((s) => s.strokeWidth);
   const strokeColor = useEditorStore((s) => s.strokeColor);
+  const strokeRandomColor = useEditorStore((s) => s.strokeRandomColor);
   const portraitUrl = useEditorStore((s) => s.portraitUrl);
   const setStrokeStyle = useEditorStore((s) => s.setStrokeStyle);
   const setStrokeWidth = useEditorStore((s) => s.setStrokeWidth);
   const setStrokeColor = useEditorStore((s) => s.setStrokeColor);
+  const setStrokeRandomColor = useEditorStore((s) => s.setStrokeRandomColor);
 
   const disabled = !portraitUrl;
+  const isPattern = strokeStyle !== 'none' && strokeStyle !== 'solid';
 
   return (
     <div className="space-y-5 animate-fade-in">
@@ -76,6 +81,24 @@ export function StrokeTab() {
               <span className="text-xs font-mono text-canvas-muted">{strokeColor}</span>
             </div>
           </div>
+
+          {isPattern && (
+            <label className="flex items-center justify-between p-3 bg-canvas-hover rounded-xl border border-canvas-border cursor-pointer">
+              <span className="text-xs font-medium text-canvas-muted">随机颜色</span>
+              <div
+                onClick={() => setStrokeRandomColor(!strokeRandomColor)}
+                className={`w-10 h-5 rounded-full transition-colors relative ${
+                  strokeRandomColor ? 'bg-canvas-text' : 'bg-canvas-border'
+                }`}
+              >
+                <div
+                  className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${
+                    strokeRandomColor ? 'translate-x-5' : 'translate-x-0.5'
+                  }`}
+                />
+              </div>
+            </label>
+          )}
         </>
       )}
     </div>

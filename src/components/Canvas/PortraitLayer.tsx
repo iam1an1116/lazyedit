@@ -1,8 +1,16 @@
 import { useRef, useEffect, useState, useMemo } from 'react';
 import { useEditorStore } from '../../store/editorStore';
 import { renderPatternStroke } from '../../utils/contour';
-import { createDotsPattern, createStripesPattern } from '../../utils/patternStroke';
+import {
+  createDotsPattern,
+  createStripesPattern,
+  createStarsPattern,
+  createLettersPattern,
+  renderRandomStroke,
+} from '../../utils/patternStroke';
 import { getFilterCSS } from '../../utils/filters';
+
+const PATTERN_STYLES = ['dots', 'stripes', 'stars', 'letters'] as const;
 
 export function PortraitLayer() {
   const portraitUrl = useEditorStore((s) => s.portraitUrl);
@@ -10,6 +18,7 @@ export function PortraitLayer() {
   const strokeStyle = useEditorStore((s) => s.strokeStyle);
   const strokeWidth = useEditorStore((s) => s.strokeWidth);
   const strokeColor = useEditorStore((s) => s.strokeColor);
+  const strokeRandomColor = useEditorStore((s) => s.strokeRandomColor);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const strokeCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -30,21 +39,20 @@ export function PortraitLayer() {
     return () => obs.disconnect();
   }, []);
 
-  // SVG filter ID for solid stroke
   const svgFilterId = useMemo(
     () => `stroke-${strokeWidth}-${strokeColor.replace('#', '')}`,
     [strokeWidth, strokeColor]
   );
 
-  // Canvas-based pattern stroke rendering (dots / stripes)
+  // Canvas-based stroke rendering
   useEffect(() => {
-    if (strokeStyle !== 'dots' && strokeStyle !== 'stripes') return;
+    const isPattern = PATTERN_STYLES.includes(strokeStyle as typeof PATTERN_STYLES[number]);
+    if (!isPattern) return;
     if (!portraitUrl) return;
 
     const canvas = strokeCanvasRef.current;
     if (!canvas) return;
 
-    // Use ResizeObserver dims, fallback to container client size
     const containerEl = containerRef.current;
     const cw = dims.w || containerEl?.clientWidth || 0;
     const ch = dims.h || containerEl?.clientHeight || 0;
@@ -58,25 +66,34 @@ export function PortraitLayer() {
       canvas.width = cw;
       canvas.height = ch;
 
-      const ctx = canvas.getContext('2d')!;
-      let style: CanvasRenderingContext2D['strokeStyle'];
-
-      if (strokeStyle === 'dots') {
-        style = createDotsPattern(ctx, strokeWidth * 0.8, strokeWidth * 2.5, strokeColor);
+      if (strokeRandomColor) {
+        renderRandomStroke(canvas, img, strokeWidth, strokeStyle as 'dots' | 'stripes' | 'stars' | 'letters');
       } else {
-        style = createStripesPattern(ctx, strokeWidth, 0, 45, strokeColor);
-      }
+        const ctx = canvas.getContext('2d')!;
+        let style: CanvasRenderingContext2D['strokeStyle'];
 
-      renderPatternStroke(canvas, img, strokeWidth, style);
+        if (strokeStyle === 'dots') {
+          style = createDotsPattern(ctx, strokeWidth * 0.8, strokeWidth * 2.5, strokeColor);
+        } else if (strokeStyle === 'stripes') {
+          style = createStripesPattern(ctx, strokeWidth, 0, 45, strokeColor);
+        } else if (strokeStyle === 'stars') {
+          style = createStarsPattern(ctx, strokeWidth * 1.2, strokeWidth * 1.5, strokeColor);
+        } else {
+          style = createLettersPattern(ctx, strokeWidth * 1.2, strokeWidth * 1.5, strokeColor);
+        }
+
+        renderPatternStroke(canvas, img, strokeWidth, style);
+      }
     };
     img.src = portraitUrl;
 
     return () => { cancelled = true; };
-  }, [portraitUrl, strokeStyle, strokeWidth, strokeColor, dims.w, dims.h]);
+  }, [portraitUrl, strokeStyle, strokeWidth, strokeColor, strokeRandomColor, dims.w, dims.h]);
 
   // Clear canvas when stroke style changes away from pattern
   useEffect(() => {
-    if (strokeStyle !== 'dots' && strokeStyle !== 'stripes') {
+    const isPattern = PATTERN_STYLES.includes(strokeStyle as typeof PATTERN_STYLES[number]);
+    if (!isPattern) {
       const canvas = strokeCanvasRef.current;
       if (canvas) {
         const ctx = canvas.getContext('2d');
@@ -99,7 +116,6 @@ export function PortraitLayer() {
 
   return (
     <div ref={containerRef} className="absolute inset-0 z-30 pointer-events-none">
-      {/* SVG filter definition for solid stroke */}
       {strokeStyle === 'solid' && (
         <svg width="0" height="0" style={{ position: 'absolute' }}>
           <defs>
@@ -121,7 +137,6 @@ export function PortraitLayer() {
         </svg>
       )}
 
-      {/* Portrait image */}
       <img
         src={portraitUrl}
         alt="Portrait"
@@ -134,7 +149,6 @@ export function PortraitLayer() {
         draggable={false}
       />
 
-      {/* Glitch effect overlay */}
       {portraitFilter === 'glitch' && (
         <>
           <img
@@ -154,13 +168,12 @@ export function PortraitLayer() {
         </>
       )}
 
-      {/* Pattern stroke canvas (dots / stripes) */}
       <canvas
         ref={strokeCanvasRef}
         className="absolute inset-0 w-full h-full"
         style={{
           pointerEvents: 'none',
-          display: strokeStyle === 'dots' || strokeStyle === 'stripes' ? 'block' : 'none',
+          display: PATTERN_STYLES.includes(strokeStyle as typeof PATTERN_STYLES[number]) ? 'block' : 'none',
         }}
       />
     </div>

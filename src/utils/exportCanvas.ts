@@ -1,7 +1,13 @@
 import type { CanvasElement, PortraitFilter, StrokeStyle } from '../types';
 import { getFilterCSS, applyGlitchEffect } from './filters';
 import { renderPatternStroke } from './contour';
-import { createDotsPattern, createStripesPattern } from './patternStroke';
+import {
+  createDotsPattern,
+  createStripesPattern,
+  createStarsPattern,
+  createLettersPattern,
+  renderRandomStroke,
+} from './patternStroke';
 
 interface ExportOptions {
   originalImage: HTMLImageElement;
@@ -12,6 +18,7 @@ interface ExportOptions {
   strokeStyle: StrokeStyle;
   strokeWidth: number;
   strokeColor: string;
+  strokeRandomColor: boolean;
   portraitFilter: PortraitFilter;
 }
 
@@ -28,6 +35,7 @@ export async function exportAsPNG(options: ExportOptions): Promise<void> {
     strokeStyle,
     strokeWidth,
     strokeColor,
+    strokeRandomColor,
     portraitFilter,
   } = options;
 
@@ -134,17 +142,27 @@ export async function exportAsPNG(options: ExportOptions): Promise<void> {
       const sCtx = strokeCanvas.getContext('2d')!;
 
       const sw = strokeWidth * Math.min(scaleX, scaleY);
-      let strokeStyleValue: CanvasRenderingContext2D['strokeStyle'];
 
       if (strokeStyle === 'solid') {
-        strokeStyleValue = strokeColor;
-      } else if (strokeStyle === 'dots') {
-        strokeStyleValue = createDotsPattern(sCtx, sw * 0.8, sw * 2.5, strokeColor);
+        renderPatternStroke(strokeCanvas, portraitImg, sw, strokeColor);
+      } else if (strokeRandomColor) {
+        renderRandomStroke(strokeCanvas, portraitImg, sw, strokeStyle as 'dots' | 'stripes' | 'stars' | 'letters');
       } else {
-        strokeStyleValue = createStripesPattern(sCtx, sw, 0, 45, strokeColor);
+        let strokeStyleValue: CanvasRenderingContext2D['strokeStyle'];
+
+        if (strokeStyle === 'dots') {
+          strokeStyleValue = createDotsPattern(sCtx, sw * 0.8, sw * 2.5, strokeColor);
+        } else if (strokeStyle === 'stripes') {
+          strokeStyleValue = createStripesPattern(sCtx, sw, 0, 45, strokeColor);
+        } else if (strokeStyle === 'stars') {
+          strokeStyleValue = createStarsPattern(sCtx, sw * 1.2, sw * 1.5, strokeColor);
+        } else {
+          strokeStyleValue = createLettersPattern(sCtx, sw * 1.2, sw * 1.5, strokeColor);
+        }
+
+        renderPatternStroke(strokeCanvas, portraitImg, sw, strokeStyleValue);
       }
 
-      renderPatternStroke(strokeCanvas, portraitImg, sw, strokeStyleValue);
       ctx.drawImage(strokeCanvas, 0, 0);
     }
   }

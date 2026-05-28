@@ -35,7 +35,7 @@ export interface ShapeElement {
 
 export type CanvasElement = TextElement | ShapeElement;
 
-export type StrokeStyle = 'none' | 'solid' | 'dots' | 'stripes';
+export type StrokeStyle = 'none' | 'solid' | 'dots' | 'stripes' | 'stars' | 'letters';
 export type PortraitFilter = 'normal' | 'silhouette' | 'bw' | 'glitch';
 
 export interface Point {
