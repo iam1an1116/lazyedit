@@ -282,7 +282,7 @@ export function LayersTab() {
         <input
           type="range"
           min="1"
-          max="50"
+          max="99"
           value={randomCount}
           onChange={(e) => setRandomCount(Number(e.target.value))}
           className="w-full"
@@ -299,6 +299,7 @@ export function LayersTab() {
       {elements.length > 0 && (
         <div className="space-y-2">
           <span className="text-xs font-medium text-canvas-muted block">已添加元素 ({elements.length})</span>
+          <div className="max-h-[200px] overflow-y-auto space-y-1.5 pr-1 scrollbar-thin">
           {elements.map((el) => (
             <div
               key={el.id}
@@ -327,6 +328,7 @@ export function LayersTab() {
               />
             </div>
           ))}
+          </div>
         </div>
       )}
 

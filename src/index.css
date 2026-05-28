@@ -83,3 +83,20 @@ input[type="color"]::-webkit-color-swatch {
 .animate-pulse-border {
   animation: pulse-border 1.5s ease-in-out infinite;
 }
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #CDCDC9;
+  border-radius: 9999px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #7A7A75;
+}
