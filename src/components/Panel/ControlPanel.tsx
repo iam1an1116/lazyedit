@@ -23,8 +23,7 @@ export function ControlPanel() {
         {/* Header */}
         <div className="flex items-center justify-between mb-4 sm:mb-6 pb-3 sm:pb-4 border-b border-canvas-bg">
           <div>
-            <h2 className="text-sm sm:text-base font-semibold">艺术编辑面板</h2>
-            <p className="text-[10px] sm:text-xs text-canvas-muted">自由编排人像与创意的层级</p>
+            <h2 className="text-sm sm:text-base font-semibold">编辑面板</h2>
           </div>
           <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-canvas-muted" />
         </div>
