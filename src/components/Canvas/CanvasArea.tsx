@@ -18,7 +18,7 @@ export function CanvasArea() {
       <div
         ref={containerRef}
         id="canvasContainer"
-        className="relative w-full max-w-[420px] max-h-[calc(100vh-200px)] bg-canvas-border rounded-2xl shadow-xl border border-[#D4D4D0]"
+        className="relative w-full max-w-[420px] max-h-[calc(100vh-200px)] bg-canvas-border rounded-2xl shadow-xl overflow-hidden border border-[#D4D4D0]"
         style={{ aspectRatio, contain: 'layout size', touchAction: 'none' }}
       >
         <BackgroundLayer />

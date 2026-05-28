@@ -129,7 +129,7 @@ export function DraggableElement({ element }: DraggableElementProps) {
         {isSelected && (
           <div
             onPointerDown={onResizeStart}
-            className="absolute -bottom-2 -right-2 z-50 w-7 h-7 bg-white border-2 border-canvas-accent rounded-full flex items-center justify-center cursor-nwse-resize shadow-sm"
+            className="absolute bottom-0 right-0 z-50 w-7 h-7 bg-white border-2 border-canvas-accent rounded-full flex items-center justify-center cursor-nwse-resize shadow-sm"
             style={{ touchAction: 'none' }}
           >
             <MoveDiagonal className="w-3.5 h-3.5 text-canvas-accent" />
