@@ -100,7 +100,8 @@ export function LayersTab() {
     const refSize = imageDimensions
       ? Math.min(imageDimensions.width, imageDimensions.height) / 12
       : 60;
-    const baseSize = Math.max(12, refSize / (1 + randomCount * 0.3));
+    const effectiveCount = Math.min(randomCount, 30);
+    const baseSize = Math.max(12, refSize / (1 + effectiveCount * 0.255));
 
     const shapeTypes: ShapeType[] = ['rectangle', 'circle', 'triangle'];
 
@@ -281,7 +282,7 @@ export function LayersTab() {
         <input
           type="range"
           min="1"
-          max="20"
+          max="50"
           value={randomCount}
           onChange={(e) => setRandomCount(Number(e.target.value))}
           className="w-full"
