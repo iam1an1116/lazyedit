@@ -9,6 +9,7 @@ export interface TextElement {
   fontSize: number;
   fontFamily: string;
   color: string;
+  opacity: number;
   strokeColor: string;
   strokeWidth: number;
   rotation: number;

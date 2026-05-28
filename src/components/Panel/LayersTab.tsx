@@ -60,6 +60,7 @@ export function LayersTab() {
       fontSize: 28,
       fontFamily: 'Inter, sans-serif',
       color: '#FFFFFF',
+      opacity: 1,
       strokeColor: '#000000',
       strokeWidth: 0,
       rotation: 0,
@@ -134,8 +135,9 @@ export function LayersTab() {
     const iw = pw * (1 - 2 * innerPad);
     const ih = ph * (1 - 2 * innerPad);
 
-    // 至少 60% 的元素在人像区域内
-    const portraitCount = Math.max(1, Math.round(randomCount * 0.6));
+    // 人像区域元素比例：数量越多比例越低
+    const portraitRatio = randomCount < 20 ? 0.3 : randomCount < 50 ? 0.1 : 0.05;
+    const portraitCount = Math.max(1, Math.round(randomCount * portraitRatio));
     const outerCount = randomCount - portraitCount;
 
     // 标记哪些元素在人像区域
@@ -206,6 +208,8 @@ export function LayersTab() {
 
       if (isText) {
         const font = ALL_FONTS[Math.floor(Math.random() * ALL_FONTS.length)];
+        const baseOpacity = 0.55 + Math.random() * 0.4; // 0.55~0.95
+        const opacity = Math.min(1, baseOpacity * 1.45);
         const el: TextElement = {
           type: 'text',
           id: genId(),
@@ -217,6 +221,7 @@ export function LayersTab() {
           fontSize: Math.round(size * 0.6),
           fontFamily: font.value,
           color: randomHex(),
+          opacity,
           strokeColor: '#000000',
           strokeWidth: 0,
           rotation,
@@ -226,7 +231,8 @@ export function LayersTab() {
         addElement(el);
       } else {
         const sizeRatio = size / (baseSize * 1.3);
-        const opacity = sizeRatio > 0.3 ? 0.3 + Math.random() * 0.4 : 1;
+        const baseOpacity = sizeRatio > 0.3 ? 0.3 + Math.random() * 0.4 : 1;
+        const opacity = Math.min(1, baseOpacity * 1.35);
 
         const st = shapeTypes[Math.floor(Math.random() * shapeTypes.length)];
         const el: ShapeElement = {

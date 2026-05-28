@@ -81,6 +81,7 @@ export function DraggableElement({ element }: DraggableElementProps) {
               fontSize: element.fontSize,
               fontFamily: element.fontFamily,
               color: element.color,
+              opacity: element.opacity,
               fontWeight: element.bold ? 'bold' : 'normal',
               fontStyle: element.italic ? 'italic' : 'normal',
               WebkitTextStroke: element.strokeWidth > 0 ? `${element.strokeWidth}px ${element.strokeColor}` : 'none',

@@ -83,6 +83,7 @@ export async function exportAsPNG(options: ExportOptions): Promise<void> {
       const font = `${el.italic ? 'italic ' : ''}${el.bold ? 'bold ' : ''}${fs}px ${el.fontFamily}`;
       ctx.font = font;
       ctx.textBaseline = 'top';
+      ctx.globalAlpha = el.opacity;
       ctx.fillStyle = el.color;
       ctx.strokeStyle = el.strokeColor;
       ctx.lineWidth = el.strokeWidth * Math.min(scaleX, scaleY);
@@ -90,6 +91,7 @@ export async function exportAsPNG(options: ExportOptions): Promise<void> {
         ctx.strokeText(el.content, x, y);
       }
       ctx.fillText(el.content, x, y);
+      ctx.globalAlpha = 1;
     }
     ctx.restore();
   }
