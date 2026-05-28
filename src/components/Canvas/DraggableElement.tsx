@@ -84,10 +84,6 @@ export function DraggableElement({ element }: DraggableElementProps) {
       enableResizing={
         isSelected
           ? {
-              top: true,
-              right: true,
-              bottom: true,
-              left: true,
               topRight: true,
               bottomRight: true,
               bottomLeft: true,
@@ -98,14 +94,10 @@ export function DraggableElement({ element }: DraggableElementProps) {
       resizeHandleStyles={
         isSelected
           ? {
-              top: { width: '100%', height: 12, top: -6, left: 0, cursor: 'ns-resize' },
-              right: { width: 12, height: '100%', top: 0, right: -6, cursor: 'ew-resize' },
-              bottom: { width: '100%', height: 12, bottom: -6, left: 0, cursor: 'ns-resize' },
-              left: { width: 12, height: '100%', top: 0, left: -6, cursor: 'ew-resize' },
-              topRight: { width: 14, height: 14, top: -7, right: -7, cursor: 'nesw-resize', background: '#FF4500', borderRadius: '50%', border: '2px solid white' },
-              bottomRight: { width: 14, height: 14, right: -7, bottom: -7, cursor: 'nwse-resize', background: '#FF4500', borderRadius: '50%', border: '2px solid white' },
-              bottomLeft: { width: 14, height: 14, left: -7, bottom: -7, cursor: 'nesw-resize', background: '#FF4500', borderRadius: '50%', border: '2px solid white' },
-              topLeft: { width: 14, height: 14, top: -7, left: -7, cursor: 'nwse-resize', background: '#FF4500', borderRadius: '50%', border: '2px solid white' },
+              topRight: { width: 20, height: 20, top: 0, right: 0, cursor: 'nesw-resize', background: '#FF4500', borderRadius: '50%', border: '2px solid white', zIndex: 70 },
+              bottomRight: { width: 20, height: 20, right: 0, bottom: 0, cursor: 'nwse-resize', background: '#FF4500', borderRadius: '50%', border: '2px solid white', zIndex: 70 },
+              bottomLeft: { width: 20, height: 20, left: 0, bottom: 0, cursor: 'nesw-resize', background: '#FF4500', borderRadius: '50%', border: '2px solid white', zIndex: 70 },
+              topLeft: { width: 20, height: 20, top: 0, left: 0, cursor: 'nwse-resize', background: '#FF4500', borderRadius: '50%', border: '2px solid white', zIndex: 70 },
             }
           : undefined
       }
