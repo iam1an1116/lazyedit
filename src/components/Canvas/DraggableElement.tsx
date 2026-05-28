@@ -2,7 +2,7 @@ import { useRef, useCallback } from 'react';
 import { Rnd } from 'react-rnd';
 import { useEditorStore } from '../../store/editorStore';
 import type { CanvasElement } from '../../types';
-import { X, RotateCw } from 'lucide-react';
+import { X, RotateCw, MoveDiagonal } from 'lucide-react';
 
 interface DraggableElementProps {
   element: CanvasElement;
@@ -42,6 +42,39 @@ export function DraggableElement({ element }: DraggableElementProps) {
     window.addEventListener('pointerup', onUp);
   }, [element.id, updateElement]);
 
+  // Custom resize handle drag
+  const onResizeStart = useCallback((e: React.PointerEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startW = element.width;
+    const startH = element.height;
+
+    const onMove = (ev: PointerEvent) => {
+      const dx = ev.clientX - startX;
+      const dy = ev.clientY - startY;
+      const newW = Math.max(20, startW + dx);
+      const newH = Math.max(20, startH + dy);
+      const updates: Partial<CanvasElement> = { width: newW, height: newH };
+      if (element.type === 'text') {
+        const scale = Math.min(newW / startW, newH / startH);
+        (updates as any).fontSize = Math.max(8, Math.round(element.fontSize * scale));
+        (updates as any).strokeWidth = Math.max(0, Math.round(element.strokeWidth * scale));
+      }
+      updateElement(element.id, updates);
+    };
+
+    const onUp = () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+    };
+
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+  }, [element, updateElement]);
+
   return (
     <Rnd
       ref={rndRef}
@@ -58,46 +91,8 @@ export function DraggableElement({ element }: DraggableElementProps) {
       onDragStop={(_e, d) => {
         updateElement(element.id, { x: d.x, y: d.y });
       }}
-      onResizeStop={(_e, _direction, ref, _delta, position) => {
-        const newW = parseInt(ref.style.width);
-        const newH = parseInt(ref.style.height);
-        if (element.type === 'text') {
-          const scale = Math.min(newW / element.width, newH / element.height);
-          updateElement(element.id, {
-            width: newW,
-            height: newH,
-            x: position.x,
-            y: position.y,
-            fontSize: Math.max(8, Math.round(element.fontSize * scale)),
-            strokeWidth: Math.max(0, Math.round(element.strokeWidth * scale)),
-          });
-        } else {
-          updateElement(element.id, {
-            width: newW,
-            height: newH,
-            x: position.x,
-            y: position.y,
-          });
-        }
-      }}
       style={{ zIndex: isSelected ? 60 : 50, touchAction: 'none' }}
-      enableResizing={isSelected}
-      resizeHandleStyles={
-        isSelected
-          ? {
-              bottomRight: {
-                width: 20,
-                height: 20,
-                right: -10,
-                bottom: -10,
-                cursor: 'nwse-resize',
-                background: '#FF4500',
-                borderRadius: '50%',
-                border: '2px solid white',
-              },
-            }
-          : undefined
-      }
+      enableResizing={false}
       dragHandleClassName="drag-handle"
     >
       <div
@@ -127,6 +122,17 @@ export function DraggableElement({ element }: DraggableElementProps) {
             style={{ touchAction: 'none' }}
           >
             <RotateCw className="w-3 h-3 text-canvas-accent" />
+          </div>
+        )}
+
+        {/* Resize handle */}
+        {isSelected && (
+          <div
+            onPointerDown={onResizeStart}
+            className="absolute -bottom-2 -right-2 z-50 w-7 h-7 bg-white border-2 border-canvas-accent rounded-full flex items-center justify-center cursor-nwse-resize shadow-sm"
+            style={{ touchAction: 'none' }}
+          >
+            <MoveDiagonal className="w-3.5 h-3.5 text-canvas-accent" />
           </div>
         )}
 
