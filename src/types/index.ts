@@ -17,7 +17,7 @@ export interface TextElement {
   italic: boolean;
 }
 
-export type ShapeType = 'rectangle' | 'circle' | 'triangle';
+export type ShapeType = 'rectangle' | 'circle' | 'triangle' | 'star';
 
 export interface ShapeElement {
   type: 'shape';

@@ -72,6 +72,22 @@ export async function exportAsPNG(options: ExportOptions): Promise<void> {
         ctx.beginPath();
         ctx.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, 0, 0, Math.PI * 2);
         ctx.fill();
+      } else if (el.shapeType === 'star') {
+        const cx = x + w / 2;
+        const cy = y + h / 2;
+        const outerR = Math.min(w, h) / 2;
+        const innerR = outerR * 0.382;
+        ctx.beginPath();
+        for (let i = 0; i < 10; i++) {
+          const r = i % 2 === 0 ? outerR : innerR;
+          const angle = (Math.PI / 2) + (Math.PI * i / 5);
+          const px = cx - r * Math.cos(angle);
+          const py = cy - r * Math.sin(angle);
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.fill();
       } else {
         const r = el.borderRadius * Math.min(scaleX, scaleY);
         drawRoundedRect(ctx, x, y, w, h, r);

@@ -99,7 +99,11 @@ export function DraggableElement({ element }: DraggableElementProps) {
               borderRadius: element.shapeType === 'circle' ? '50%' : element.borderRadius,
               opacity: element.opacity,
               transform: element.rotation ? `rotate(${element.rotation}deg)` : 'none',
-              clipPath: element.shapeType === 'triangle' ? 'polygon(50% 0%, 0% 100%, 100% 100%)' : undefined,
+              clipPath: element.shapeType === 'triangle'
+                ? 'polygon(50% 0%, 0% 100%, 100% 100%)'
+                : element.shapeType === 'star'
+                ? 'polygon(50% 0%, 61.8% 34.5%, 97.6% 34.5%, 68.9% 56.5%, 79.4% 90.5%, 50% 69%, 20.6% 90.5%, 31.1% 56.5%, 2.4% 34.5%, 38.2% 34.5%)'
+                : undefined,
             }}
           />
         )}

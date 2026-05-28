@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { Type, Square, Triangle, Shuffle } from 'lucide-react';
+import { Type, Square, Triangle, Star, Shuffle } from 'lucide-react';
 import { useEditorStore } from '../../store/editorStore';
 import { getPortraitBounds } from '../../utils/portraitBounds';
 import type { CanvasElement, TextElement, ShapeElement, ShapeType } from '../../types';
+
+type RandomElementType = 'text' | 'rectangle' | 'circle' | 'triangle' | 'star';
 
 let nextId = 1;
 function genId() {
@@ -47,6 +49,17 @@ export function LayersTab() {
   const imageDimensions = useEditorStore((s) => s.imageDimensions);
 
   const [randomCount, setRandomCount] = useState(5);
+  const [randomSize, setRandomSize] = useState(1); // 1 = auto
+  const [enabledTypes, setEnabledTypes] = useState<RandomElementType[]>(['text', 'rectangle', 'circle', 'triangle', 'star']);
+
+  const toggleType = (t: RandomElementType) => {
+    setEnabledTypes((prev) => {
+      if (prev.includes(t)) {
+        return prev.length > 1 ? prev.filter((x) => x !== t) : prev;
+      }
+      return [...prev, t];
+    });
+  };
 
   const addText = () => {
     const el: TextElement = {
@@ -97,14 +110,17 @@ export function LayersTab() {
     const cw = container?.clientWidth || 320;
     const ch = container?.clientHeight || 427;
 
-    // 基准尺寸：短边 / 12，再按数量缩放
+    // 基准尺寸：短边 / 12，再按数量缩放，乘以手动倍率
     const refSize = imageDimensions
       ? Math.min(imageDimensions.width, imageDimensions.height) / 12
       : 60;
     const effectiveCount = Math.min(randomCount, 30);
-    const baseSize = Math.max(12, refSize / (1 + effectiveCount * 0.255));
+    const autoSize = refSize / (1 + effectiveCount * 0.255);
+    const baseSize = Math.max(12, autoSize * randomSize);
 
-    const shapeTypes: ShapeType[] = ['rectangle', 'circle', 'triangle'];
+    const shapeTypes: ShapeType[] = ['rectangle', 'circle', 'triangle', 'star'];
+    const enabledShapes = enabledTypes.filter((t) => t !== 'text') as ShapeType[];
+    const hasText = enabledTypes.includes('text');
 
     // 获取真实人像区域，fallback 到画布中心 60%
     const portraitUrl = useEditorStore.getState().portraitUrl;
@@ -204,7 +220,13 @@ export function LayersTab() {
       cx = Math.max(0, Math.min(cw - size, cx));
       cy = Math.max(0, Math.min(ch - size, cy));
 
-      const isText = Math.random() > 0.5;
+      // 根据勾选决定元素类型
+      let isText = false;
+      if (hasText && enabledShapes.length > 0) {
+        isText = Math.random() > 0.5;
+      } else if (hasText) {
+        isText = true;
+      }
 
       if (isText) {
         const font = ALL_FONTS[Math.floor(Math.random() * ALL_FONTS.length)];
@@ -234,7 +256,7 @@ export function LayersTab() {
         const baseOpacity = sizeRatio > 0.3 ? 0.3 + Math.random() * 0.4 : 1;
         const opacity = Math.min(1, baseOpacity * 1.35);
 
-        const st = shapeTypes[Math.floor(Math.random() * shapeTypes.length)];
+        const st = enabledShapes[Math.floor(Math.random() * enabledShapes.length)];
         const el: ShapeElement = {
           type: 'shape',
           shapeType: st,
@@ -293,6 +315,49 @@ export function LayersTab() {
           onChange={(e) => setRandomCount(Number(e.target.value))}
           className="w-full"
         />
+
+        {/* 元素大小 */}
+        <div className="flex items-center justify-between text-xs text-canvas-muted">
+          <span>元素大小</span>
+          <span className="font-mono text-canvas-text">{randomSize === 1 ? '自动' : `${Math.round(randomSize * 100)}%`}</span>
+        </div>
+        <input
+          type="range"
+          min="0.3"
+          max="3"
+          step="0.1"
+          value={randomSize}
+          onChange={(e) => setRandomSize(Number(e.target.value))}
+          className="w-full"
+        />
+
+        {/* 元素类型勾选 */}
+        <div className="space-y-1.5">
+          <span className="text-xs text-canvas-muted">元素类型</span>
+          <div className="flex flex-wrap gap-1.5">
+            {([
+              { key: 'text' as RandomElementType, label: '文字', Icon: Type },
+              { key: 'star' as RandomElementType, label: '五角星', Icon: Star },
+              { key: 'rectangle' as RandomElementType, label: '方块', Icon: Square },
+              { key: 'triangle' as RandomElementType, label: '三角形', Icon: Triangle },
+              { key: 'circle' as RandomElementType, label: '圆形', Icon: () => <div className="w-3.5 h-3.5 rounded-full border border-current" /> },
+            ]).map(({ key, label, Icon }) => (
+              <button
+                key={key}
+                onClick={() => toggleType(key)}
+                className={`flex items-center space-x-1 px-2 py-1 rounded-lg text-[10px] border transition-all ${
+                  enabledTypes.includes(key)
+                    ? 'border-canvas-text bg-canvas-text text-white'
+                    : 'border-canvas-border bg-white text-canvas-muted'
+                }`}
+              >
+                <Icon className="w-3 h-3" />
+                <span>{label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         <button
           onClick={generateRandom}
           className="w-full py-2.5 bg-canvas-text text-white text-xs font-medium rounded-xl hover:bg-neutral-700 transition-colors"
@@ -321,11 +386,13 @@ export function LayersTab() {
                   <Type className="w-3.5 h-3.5 text-canvas-muted" />
                 ) : el.type === 'shape' && el.shapeType === 'triangle' ? (
                   <Triangle className="w-3.5 h-3.5 text-canvas-muted" />
+                ) : el.type === 'shape' && el.shapeType === 'star' ? (
+                  <Star className="w-3.5 h-3.5 text-canvas-muted" />
                 ) : (
                   <Square className="w-3.5 h-3.5 text-canvas-muted" />
                 )}
                 <span className="text-xs truncate max-w-[120px]">
-                  {el.type === 'text' ? el.content : el.shapeType === 'triangle' ? '三角形' : '色块'}
+                  {el.type === 'text' ? el.content : el.shapeType === 'triangle' ? '三角形' : el.shapeType === 'star' ? '五角星' : el.shapeType === 'circle' ? '圆形' : '色块'}
                 </span>
               </div>
               <div
@@ -448,8 +515,8 @@ export function LayersTab() {
               {/* Shape type selector */}
               <div>
                 <span className="text-[10px] text-canvas-muted block mb-2">形状类型</span>
-                <div className="grid grid-cols-3 gap-2">
-                  {(['rectangle', 'circle', 'triangle'] as ShapeType[]).map((st) => (
+                <div className="grid grid-cols-4 gap-2">
+                  {(['rectangle', 'circle', 'triangle', 'star'] as ShapeType[]).map((st) => (
                     <button
                       key={st}
                       onClick={() => updateElement(selected.id, { shapeType: st, borderRadius: st === 'circle' ? 50 : 0 })}
@@ -462,7 +529,8 @@ export function LayersTab() {
                       {st === 'rectangle' && <Square className="w-3 h-3" />}
                       {st === 'circle' && <div className="w-3 h-3 rounded-full border border-current" />}
                       {st === 'triangle' && <Triangle className="w-3 h-3" />}
-                      <span>{st === 'rectangle' ? '矩形' : st === 'circle' ? '圆形' : '三角'}</span>
+                      {st === 'star' && <Star className="w-3 h-3" />}
+                      <span>{st === 'rectangle' ? '矩形' : st === 'circle' ? '圆形' : st === 'triangle' ? '三角' : '五角'}</span>
                     </button>
                   ))}
                 </div>
