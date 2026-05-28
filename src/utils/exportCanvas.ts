@@ -151,13 +151,16 @@ export async function exportAsPNG(options: ExportOptions): Promise<void> {
         let strokeStyleValue: CanvasRenderingContext2D['strokeStyle'];
 
         if (strokeStyle === 'dots') {
-          strokeStyleValue = createDotsPattern(sCtx, sw * 0.8, sw * 2.5, strokeColor);
+          const r = Math.max(2.5, sw * 0.28);
+          strokeStyleValue = createDotsPattern(sCtx, r, r * 2, strokeColor);
         } else if (strokeStyle === 'stripes') {
           strokeStyleValue = createStripesPattern(sCtx, sw, 0, 45, strokeColor);
         } else if (strokeStyle === 'stars') {
-          strokeStyleValue = createStarsPattern(sCtx, sw * 1.2, sw * 1.5, strokeColor);
+          const sz = Math.max(6, sw * 0.55);
+          strokeStyleValue = createStarsPattern(sCtx, sz, sz * 1.2, strokeColor);
         } else {
-          strokeStyleValue = createLettersPattern(sCtx, sw * 1.2, sw * 1.5, strokeColor);
+          const sz = Math.max(6, sw * 0.6);
+          strokeStyleValue = createLettersPattern(sCtx, sz, sz * 1.2, strokeColor);
         }
 
         renderPatternStroke(strokeCanvas, portraitImg, sw, strokeStyleValue);

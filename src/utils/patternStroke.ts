@@ -7,7 +7,7 @@ export function createDotsPattern(
   spacing: number,
   color: string
 ): CanvasPattern {
-  const size = spacing;
+  const size = Math.max(8, Math.round(dotRadius * 2 + spacing));
   const patternCanvas = document.createElement('canvas');
   patternCanvas.width = size;
   patternCanvas.height = size;
@@ -65,7 +65,7 @@ export function createStarsPattern(
   spacing: number,
   color: string
 ): CanvasPattern {
-  const size = Math.max(16, Math.round(starSize + spacing));
+  const size = Math.max(12, Math.round(starSize + spacing));
   const patternCanvas = document.createElement('canvas');
   patternCanvas.width = size;
   patternCanvas.height = size;
@@ -85,7 +85,7 @@ export function createLettersPattern(
   spacing: number,
   color: string
 ): CanvasPattern {
-  const size = Math.max(16, Math.round(fontSize + spacing));
+  const size = Math.max(12, Math.round(fontSize + spacing));
   const patternCanvas = document.createElement('canvas');
   patternCanvas.width = size;
   patternCanvas.height = size;
@@ -159,27 +159,20 @@ export function renderRandomStroke(
 
   // Find boundary points
   const step = Math.max(1, Math.floor(Math.min(imgW, imgH) / 400));
-  const contourPoints: { x: number; y: number; nx: number; ny: number }[] = [];
+  const contourPoints: { x: number; y: number }[] = [];
 
   for (let y = step; y < imgH - step; y += step) {
     for (let x = step; x < imgW - step; x += step) {
       const alpha = data[(y * imgW + x) * 4 + 3];
       if (alpha < 30) continue;
-      // Check if boundary
       const left = data[(y * imgW + (x - step)) * 4 + 3];
       const right = data[(y * imgW + (x + step)) * 4 + 3];
       const up = data[((y - step) * imgW + x) * 4 + 3];
       const down = data[((y + step) * imgW + x) * 4 + 3];
       if (left < 30 || right < 30 || up < 30 || down < 30) {
-        // Approximate normal (gradient direction)
-        const dx = (right - left) / 255;
-        const dy = (down - up) / 255;
-        const len = Math.sqrt(dx * dx + dy * dy) || 1;
         contourPoints.push({
           x: (x / imgW) * W,
           y: (y / imgH) * H,
-          nx: dx / len,
-          ny: dy / len,
         });
       }
     }
@@ -187,24 +180,32 @@ export function renderRandomStroke(
 
   if (contourPoints.length === 0) return;
 
-  // Sample points evenly spaced
-  const elemSize = strokeType === 'letters' ? strokeWidth * 1.2 : strokeWidth * 0.9;
-  const spacing = elemSize * 1.8;
-  const sampled: typeof contourPoints = [];
-  let lastDist = spacing; // force first point
+  // Element sizing: must fit inside the ring (ring width ≈ strokeWidth)
+  // Keep element ≤ 55% of ring width so it doesn't clip at edges
+  const maxElem = strokeWidth * 0.55;
+  const elemSize = Math.max(4, strokeType === 'letters'
+    ? Math.min(maxElem, strokeWidth * 0.7)
+    : Math.min(maxElem, strokeWidth * 0.5));
 
-  for (const pt of contourPoints) {
+  // Spacing: tighter for denser stroke feel
+  const spacing = elemSize * 2.2;
+
+  // Sample points with correct accumulation
+  const sampled: typeof contourPoints = [];
+  let accumulated = Infinity; // force first point
+
+  for (let i = 0; i < contourPoints.length; i++) {
     if (sampled.length === 0) {
-      sampled.push(pt);
-      lastDist = 0;
+      sampled.push(contourPoints[i]);
+      accumulated = 0;
       continue;
     }
-    const prev = sampled[sampled.length - 1];
-    const d = Math.sqrt((pt.x - prev.x) ** 2 + (pt.y - prev.y) ** 2);
-    lastDist += d;
-    if (lastDist >= spacing) {
-      sampled.push(pt);
-      lastDist = 0;
+    const prev = contourPoints[i - 1];
+    const cur = contourPoints[i];
+    accumulated += Math.sqrt((cur.x - prev.x) ** 2 + (cur.y - prev.y) ** 2);
+    if (accumulated >= spacing) {
+      sampled.push(cur);
+      accumulated = 0;
     }
   }
 
@@ -227,7 +228,6 @@ export function renderRandomStroke(
       ctx.textBaseline = 'middle';
       ctx.fillText(letter, pt.x, pt.y);
     } else if (strokeType === 'stripes') {
-      // Draw a small angled stripe segment at this point
       ctx.save();
       ctx.translate(pt.x, pt.y);
       ctx.rotate((45 * Math.PI) / 180);
