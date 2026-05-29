@@ -50,6 +50,7 @@ export function LayersTab() {
 
   const [randomCount, setRandomCount] = useState(5);
   const [randomSize, setRandomSize] = useState(1); // 1 = auto
+  const [randomOpacity, setRandomOpacity] = useState(0); // 0 = auto
   const [enabledTypes, setEnabledTypes] = useState<RandomElementType[]>(['text', 'rectangle', 'circle', 'triangle', 'star']);
 
   const toggleType = (t: RandomElementType) => {
@@ -229,8 +230,13 @@ export function LayersTab() {
 
       if (isText) {
         const font = ALL_FONTS[Math.floor(Math.random() * ALL_FONTS.length)];
-        const baseOpacity = 0.55 + Math.random() * 0.4; // 0.55~0.95
-        const opacity = Math.min(1, baseOpacity * 1.45);
+        let opacity: number;
+        if (randomOpacity > 0) {
+          opacity = Math.min(1, Math.max(0.05, randomOpacity + (Math.random() - 0.5) * 0.2));
+        } else {
+          const baseOpacity = 0.55 + Math.random() * 0.4;
+          opacity = Math.min(1, baseOpacity * 1.45);
+        }
         const el: TextElement = {
           type: 'text',
           id: genId(),
@@ -251,9 +257,14 @@ export function LayersTab() {
         };
         addElement(el);
       } else {
-        const sizeRatio = size / (baseSize * 1.3);
-        const baseOpacity = sizeRatio > 0.3 ? 0.3 + Math.random() * 0.4 : 1;
-        const opacity = Math.min(1, baseOpacity * 1.35);
+        let opacity: number;
+        if (randomOpacity > 0) {
+          opacity = Math.min(1, Math.max(0.05, randomOpacity + (Math.random() - 0.5) * 0.2));
+        } else {
+          const sizeRatio = size / (baseSize * 1.3);
+          const baseOpacity = sizeRatio > 0.3 ? 0.3 + Math.random() * 0.4 : 1;
+          opacity = Math.min(1, baseOpacity * 1.35);
+        }
 
         const st = enabledShapes[Math.floor(Math.random() * enabledShapes.length)];
         const el: ShapeElement = {
@@ -327,6 +338,21 @@ export function LayersTab() {
           step="0.1"
           value={randomSize}
           onChange={(e) => setRandomSize(Number(e.target.value))}
+          className="w-full"
+        />
+
+        {/* 不透明度 */}
+        <div className="flex items-center justify-between text-xs text-canvas-muted">
+          <span>不透明度</span>
+          <span className="font-mono text-canvas-text">{randomOpacity === 0 ? '自动' : `${Math.round(randomOpacity * 100)}%`}</span>
+        </div>
+        <input
+          type="range"
+          min="0"
+          max="1"
+          step="0.05"
+          value={randomOpacity}
+          onChange={(e) => setRandomOpacity(Number(e.target.value))}
           className="w-full"
         />
 
