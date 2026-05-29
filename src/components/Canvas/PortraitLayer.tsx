@@ -19,6 +19,8 @@ export function PortraitLayer() {
   const strokeColor = useEditorStore((s) => s.strokeColor);
   const strokeElementScale = useEditorStore((s) => s.strokeElementScale);
   const strokeDensity = useEditorStore((s) => s.strokeDensity);
+  const strokeAngle = useEditorStore((s) => s.strokeAngle);
+  const strokeOpacity = useEditorStore((s) => s.strokeOpacity);
   const containerRef = useRef<HTMLDivElement>(null);
   const strokeCanvasRef = useRef<HTMLCanvasElement>(null);
   const [dims, setDims] = useState({ w: 0, h: 0 });
@@ -72,7 +74,7 @@ export function PortraitLayer() {
         const r = Math.max(2, strokeWidth * 0.22 * strokeElementScale);
         style = createDotsPattern(ctx, r, r * 1.6, strokeColor, strokeDensity);
       } else if (strokeStyle === 'stripes') {
-        style = createStripesPattern(ctx, strokeWidth * strokeElementScale, 0, 45, strokeColor, strokeDensity);
+        style = createStripesPattern(ctx, strokeWidth * strokeElementScale, 0, strokeAngle, strokeColor, strokeDensity);
       } else if (strokeStyle === 'stars') {
         const sz = Math.max(5, strokeWidth * 0.42 * strokeElementScale);
         style = createStarsPattern(ctx, sz, sz * 1.1, strokeColor, strokeDensity);
@@ -81,12 +83,23 @@ export function PortraitLayer() {
         style = createLettersPattern(ctx, sz, sz * 1.1, strokeColor, strokeDensity);
       }
 
-      renderPatternStroke(canvas, img, strokeWidth, style);
+      if (strokeOpacity < 1) {
+        const tmp = document.createElement('canvas');
+        tmp.width = cw;
+        tmp.height = ch;
+        renderPatternStroke(tmp, img, strokeWidth, style);
+        const ctx2 = canvas.getContext('2d')!;
+        ctx2.globalAlpha = strokeOpacity;
+        ctx2.drawImage(tmp, 0, 0);
+        ctx2.globalAlpha = 1;
+      } else {
+        renderPatternStroke(canvas, img, strokeWidth, style);
+      }
     };
     img.src = portraitUrl;
 
     return () => { cancelled = true; };
-  }, [portraitUrl, strokeStyle, strokeWidth, strokeColor, strokeElementScale, strokeDensity, dims.w, dims.h]);
+  }, [portraitUrl, strokeStyle, strokeWidth, strokeColor, strokeElementScale, strokeDensity, strokeAngle, strokeOpacity, dims.w, dims.h]);
 
   // Clear canvas when stroke style changes away from pattern
   useEffect(() => {

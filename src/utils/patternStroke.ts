@@ -30,7 +30,7 @@ export function createStripesPattern(
   ctx: CanvasRenderingContext2D,
   stripeWidth: number,
   _gap: number,
-  _angle: number,
+  angle: number,
   color: string,
   density = 1
 ): CanvasPattern {
@@ -47,7 +47,7 @@ export function createStripesPattern(
 
   pCtx.save();
   pCtx.translate(size / 2, size / 2);
-  pCtx.rotate((45 * Math.PI) / 180);
+  pCtx.rotate((angle * Math.PI) / 180);
   pCtx.translate(-size / 2, -size / 2);
 
   pCtx.fillStyle = color;

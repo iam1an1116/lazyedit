@@ -20,6 +20,8 @@ export function useExport() {
         strokeColor: store.strokeColor,
         strokeElementScale: store.strokeElementScale,
         strokeDensity: store.strokeDensity,
+        strokeAngle: store.strokeAngle,
+        strokeOpacity: store.strokeOpacity,
         portraitFilter: store.portraitFilter,
       });
     },

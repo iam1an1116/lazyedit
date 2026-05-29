@@ -1,5 +1,7 @@
 import { useEditorStore } from '../../store/editorStore';
 import type { StrokeStyle } from '../../types';
+import { applyRandomStroke } from '../../utils/randomStroke';
+import { Shuffle } from 'lucide-react';
 
 const strokeOptions: { key: StrokeStyle; label: string }[] = [
   { key: 'none', label: '无描边' },
@@ -10,20 +12,33 @@ const strokeOptions: { key: StrokeStyle; label: string }[] = [
   { key: 'letters', label: '字母描边' },
 ];
 
+const PATTERN_STYLES: StrokeStyle[] = ['dots', 'stripes', 'stars', 'letters'];
+
 export function StrokeTab() {
   const strokeStyle = useEditorStore((s) => s.strokeStyle);
   const strokeWidth = useEditorStore((s) => s.strokeWidth);
   const strokeColor = useEditorStore((s) => s.strokeColor);
   const strokeElementScale = useEditorStore((s) => s.strokeElementScale);
   const strokeDensity = useEditorStore((s) => s.strokeDensity);
+  const strokeAngle = useEditorStore((s) => s.strokeAngle);
+  const strokeOpacity = useEditorStore((s) => s.strokeOpacity);
   const portraitUrl = useEditorStore((s) => s.portraitUrl);
   const setStrokeStyle = useEditorStore((s) => s.setStrokeStyle);
   const setStrokeWidth = useEditorStore((s) => s.setStrokeWidth);
   const setStrokeColor = useEditorStore((s) => s.setStrokeColor);
   const setStrokeElementScale = useEditorStore((s) => s.setStrokeElementScale);
   const setStrokeDensity = useEditorStore((s) => s.setStrokeDensity);
+  const setStrokeAngle = useEditorStore((s) => s.setStrokeAngle);
+  const setStrokeOpacity = useEditorStore((s) => s.setStrokeOpacity);
   const disabled = !portraitUrl;
-  const isPattern = strokeStyle !== 'none' && strokeStyle !== 'solid';
+  const isPattern = PATTERN_STYLES.includes(strokeStyle);
+
+  const randomStroke = () => {
+    applyRandomStroke({
+      setStrokeStyle, setStrokeColor, setStrokeWidth,
+      setStrokeElementScale, setStrokeDensity, setStrokeAngle, setStrokeOpacity,
+    });
+  };
 
   return (
     <div className="space-y-5 animate-fade-in">
@@ -116,11 +131,52 @@ export function StrokeTab() {
                   className="w-full"
                 />
               </div>
+
+              {strokeStyle === 'stripes' && (
+                <div className="space-y-2">
+                  <div className="flex justify-between text-xs text-canvas-muted">
+                    <span>条纹角度</span>
+                    <span className="font-mono text-canvas-text">{strokeAngle}°</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="180"
+                    value={strokeAngle}
+                    onChange={(e) => setStrokeAngle(Number(e.target.value))}
+                    className="w-full"
+                  />
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs text-canvas-muted">
+                  <span>不透明度</span>
+                  <span className="font-mono text-canvas-text">{Math.round(strokeOpacity * 100)}%</span>
+                </div>
+                <input
+                  type="range"
+                  min="0.1"
+                  max="1"
+                  step="0.05"
+                  value={strokeOpacity}
+                  onChange={(e) => setStrokeOpacity(Number(e.target.value))}
+                  className="w-full"
+                />
+              </div>
             </>
           )}
-
         </>
       )}
+
+      <button
+        onClick={randomStroke}
+        disabled={disabled}
+        className="w-full py-2.5 bg-canvas-text text-white text-xs font-medium rounded-xl hover:bg-neutral-700 transition-colors disabled:opacity-40 flex items-center justify-center space-x-1.5"
+      >
+        <Shuffle className="w-3.5 h-3.5" />
+        <span>随便描一下</span>
+      </button>
     </div>
   );
 }

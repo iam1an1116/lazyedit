@@ -19,6 +19,8 @@ interface ExportOptions {
   strokeColor: string;
   strokeElementScale: number;
   strokeDensity: number;
+  strokeAngle: number;
+  strokeOpacity: number;
   portraitFilter: PortraitFilter;
 }
 
@@ -37,6 +39,8 @@ export async function exportAsPNG(options: ExportOptions): Promise<void> {
     strokeColor,
     strokeElementScale,
     strokeDensity,
+    strokeAngle,
+    strokeOpacity,
     portraitFilter,
   } = options;
 
@@ -153,7 +157,7 @@ export async function exportAsPNG(options: ExportOptions): Promise<void> {
           const r = Math.max(2, sw * 0.22 * strokeElementScale);
           strokeStyleValue = createDotsPattern(sCtx, r, r * 1.6, strokeColor, strokeDensity);
         } else if (strokeStyle === 'stripes') {
-          strokeStyleValue = createStripesPattern(sCtx, sw * strokeElementScale, 0, 45, strokeColor, strokeDensity);
+          strokeStyleValue = createStripesPattern(sCtx, sw * strokeElementScale, 0, strokeAngle, strokeColor, strokeDensity);
         } else if (strokeStyle === 'stars') {
           const sz = Math.max(5, sw * 0.42 * strokeElementScale);
           strokeStyleValue = createStarsPattern(sCtx, sz, sz * 1.1, strokeColor, strokeDensity);
@@ -162,7 +166,17 @@ export async function exportAsPNG(options: ExportOptions): Promise<void> {
           strokeStyleValue = createLettersPattern(sCtx, sz, sz * 1.1, strokeColor, strokeDensity);
         }
 
-        renderPatternStroke(strokeCanvas, portraitImg, sw, strokeStyleValue);
+        if (strokeOpacity < 1) {
+          const tmp = document.createElement('canvas');
+          tmp.width = origW;
+          tmp.height = origH;
+          renderPatternStroke(tmp, portraitImg, sw, strokeStyleValue);
+          sCtx.globalAlpha = strokeOpacity;
+          sCtx.drawImage(tmp, 0, 0);
+          sCtx.globalAlpha = 1;
+        } else {
+          renderPatternStroke(strokeCanvas, portraitImg, sw, strokeStyleValue);
+        }
       }
 
       ctx.drawImage(strokeCanvas, 0, 0);

@@ -1,7 +1,9 @@
 import { useCallback, useRef } from 'react';
-import { Upload, Image as ImageIcon, X, RotateCcw } from 'lucide-react';
+import { Upload, Image as ImageIcon, X, RotateCcw, Zap } from 'lucide-react';
 import { useEditorStore } from '../../store/editorStore';
 import { useBackgroundRemoval } from '../../hooks/useBackgroundRemoval';
+import { generateRandomFill } from '../../utils/randomFill';
+import { applyRandomStroke } from '../../utils/randomStroke';
 
 export function UploadTab() {
   const originalImage = useEditorStore((s) => s.originalImage);
@@ -12,8 +14,31 @@ export function UploadTab() {
   const setImage = useEditorStore((s) => s.setImage);
   const clearImage = useEditorStore((s) => s.clearImage);
   const resetEdits = useEditorStore((s) => s.resetEdits);
+  const addElement = useEditorStore((s) => s.addElement);
+  const resetElements = useEditorStore((s) => s.resetElements);
+  const imageDimensions = useEditorStore((s) => s.imageDimensions);
+  const setStrokeStyle = useEditorStore((s) => s.setStrokeStyle);
+  const setStrokeColor = useEditorStore((s) => s.setStrokeColor);
+  const setStrokeWidth = useEditorStore((s) => s.setStrokeWidth);
+  const setStrokeElementScale = useEditorStore((s) => s.setStrokeElementScale);
+  const setStrokeDensity = useEditorStore((s) => s.setStrokeDensity);
+  const setStrokeAngle = useEditorStore((s) => s.setStrokeAngle);
+  const setStrokeOpacity = useEditorStore((s) => s.setStrokeOpacity);
   const { remove } = useBackgroundRemoval();
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleLazy = useCallback(async () => {
+    applyRandomStroke({
+      setStrokeStyle, setStrokeColor, setStrokeWidth,
+      setStrokeElementScale, setStrokeDensity, setStrokeAngle, setStrokeOpacity,
+    });
+    await generateRandomFill({
+      imageDimensions,
+      portraitUrl,
+      addElement,
+      resetElements,
+    });
+  }, [imageDimensions, portraitUrl, addElement, resetElements, setStrokeStyle, setStrokeColor, setStrokeWidth, setStrokeElementScale, setStrokeDensity, setStrokeAngle, setStrokeOpacity]);
 
   const handleFile = useCallback(
     async (file: File) => {
@@ -130,6 +155,13 @@ export function UploadTab() {
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>重置为原图</span>
+          </button>
+          <button
+            onClick={handleLazy}
+            className="w-full py-3 bg-gradient-to-r from-canvas-text to-neutral-600 text-white text-sm font-bold rounded-xl hover:from-neutral-700 hover:to-neutral-800 transition-all flex items-center justify-center space-x-2 shadow-lg"
+          >
+            <Zap className="w-4 h-4" />
+            <span>LAZY</span>
           </button>
         </div>
       )}
