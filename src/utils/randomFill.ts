@@ -20,8 +20,21 @@ const ALL_FONTS = [
   { label: 'Press Start 2P', value: 'Press Start 2P, cursive' },
 ];
 
-function randomHex(): string {
-  return '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+function hslToHex(h: number, s: number, l: number): string {
+  s /= 100;
+  l /= 100;
+  const a = s * Math.min(l, 1 - l);
+  const f = (n: number) => {
+    const k = (n + h / 30) % 12;
+    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * color).toString(16).padStart(2, '0');
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
+
+function randomSaturatedHex(): string {
+  const h = Math.floor(Math.random() * 360);
+  return hslToHex(h, 100, 50);
 }
 
 function randomLetters(): string {
@@ -186,7 +199,7 @@ export async function generateRandomFill(opts: RandomFillOptions): Promise<void>
         content: randomLetters(),
         fontSize: Math.round(size * 0.6),
         fontFamily: font.value,
-        color: randomHex(),
+        color: randomSaturatedHex(),
         opacity: elOpacity,
         strokeColor: '#000000',
         strokeWidth: 0,
@@ -214,7 +227,7 @@ export async function generateRandomFill(opts: RandomFillOptions): Promise<void>
         y: Math.round(cy),
         width: size,
         height: size,
-        color: randomHex(),
+        color: randomSaturatedHex(),
         borderRadius: st === 'circle' ? 50 : 0,
         opacity: elOpacity,
         rotation,

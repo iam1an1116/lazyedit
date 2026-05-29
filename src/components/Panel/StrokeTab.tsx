@@ -1,7 +1,7 @@
 import { useEditorStore } from '../../store/editorStore';
 import type { StrokeStyle } from '../../types';
 import { applyRandomStroke } from '../../utils/randomStroke';
-import { Shuffle } from 'lucide-react';
+import { Shuffle, Palette, CaseSensitive } from 'lucide-react';
 
 const strokeOptions: { key: StrokeStyle; label: string }[] = [
   { key: 'none', label: '无描边' },
@@ -30,6 +30,10 @@ export function StrokeTab() {
   const setStrokeDensity = useEditorStore((s) => s.setStrokeDensity);
   const setStrokeAngle = useEditorStore((s) => s.setStrokeAngle);
   const setStrokeOpacity = useEditorStore((s) => s.setStrokeOpacity);
+  const strokeRandomColor = useEditorStore((s) => s.strokeRandomColor);
+  const setStrokeRandomColor = useEditorStore((s) => s.setStrokeRandomColor);
+  const strokeLetter = useEditorStore((s) => s.strokeLetter);
+  const setStrokeLetter = useEditorStore((s) => s.setStrokeLetter);
   const disabled = !portraitUrl;
   const isPattern = PATTERN_STYLES.includes(strokeStyle);
 
@@ -37,6 +41,7 @@ export function StrokeTab() {
     applyRandomStroke({
       setStrokeStyle, setStrokeColor, setStrokeWidth,
       setStrokeElementScale, setStrokeDensity, setStrokeAngle, setStrokeOpacity,
+      setStrokeRandomColor, setStrokeLetter,
     });
   };
 
@@ -93,8 +98,22 @@ export function StrokeTab() {
                 value={strokeColor}
                 onChange={(e) => setStrokeColor(e.target.value)}
                 className="w-10 h-10"
+                style={{ opacity: strokeRandomColor ? 0.4 : 1 }}
               />
               <span className="text-xs font-mono text-canvas-muted">{strokeColor}</span>
+              {isPattern && (
+                <button
+                  onClick={() => setStrokeRandomColor(!strokeRandomColor)}
+                  className={`ml-auto flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-[10px] border transition-all ${
+                    strokeRandomColor
+                      ? 'border-canvas-text bg-canvas-text text-white'
+                      : 'border-canvas-border bg-white text-canvas-muted'
+                  }`}
+                >
+                  <Palette className="w-3 h-3" />
+                  <span>随机</span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -146,6 +165,37 @@ export function StrokeTab() {
                     onChange={(e) => setStrokeAngle(Number(e.target.value))}
                     className="w-full"
                   />
+                </div>
+              )}
+
+              {strokeStyle === 'letters' && (
+                <div className="space-y-2">
+                  <span className="text-xs font-medium text-canvas-muted block">字母设置</span>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      maxLength={1}
+                      value={strokeLetter === 'random' ? '' : strokeLetter}
+                      onChange={(e) => {
+                        const v = e.target.value.toUpperCase().replace(/[^A-Z]/g, '');
+                        if (v) setStrokeLetter(v);
+                      }}
+                      placeholder="A"
+                      disabled={strokeLetter === 'random'}
+                      className="w-12 h-9 text-center text-sm font-mono bg-white border border-canvas-border rounded-lg focus:outline-none focus:border-canvas-text disabled:opacity-40 disabled:bg-canvas-hover"
+                    />
+                    <button
+                      onClick={() => setStrokeLetter(strokeLetter === 'random' ? 'A' : 'random')}
+                      className={`flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-[10px] border transition-all ${
+                        strokeLetter === 'random'
+                          ? 'border-canvas-text bg-canvas-text text-white'
+                          : 'border-canvas-border bg-white text-canvas-muted'
+                      }`}
+                    >
+                      <CaseSensitive className="w-3 h-3" />
+                      <span>每字母随机</span>
+                    </button>
+                  </div>
                 </div>
               )}
 

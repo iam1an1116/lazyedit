@@ -1,12 +1,6 @@
 import type { CanvasElement, PortraitFilter, StrokeStyle } from '../types';
 import { getFilterCSS, applyGlitchEffect } from './filters';
-import { renderPatternStroke } from './contour';
-import {
-  createDotsPattern,
-  createStripesPattern,
-  createStarsPattern,
-  createLettersPattern,
-} from './patternStroke';
+import { renderPatternStroke, renderElementStroke } from './contour';
 
 interface ExportOptions {
   originalImage: HTMLImageElement;
@@ -21,6 +15,8 @@ interface ExportOptions {
   strokeDensity: number;
   strokeAngle: number;
   strokeOpacity: number;
+  strokeRandomColor: boolean;
+  strokeLetter: string;
   portraitFilter: PortraitFilter;
 }
 
@@ -41,6 +37,8 @@ export async function exportAsPNG(options: ExportOptions): Promise<void> {
     strokeDensity,
     strokeAngle,
     strokeOpacity,
+    strokeRandomColor,
+    strokeLetter,
     portraitFilter,
   } = options;
 
@@ -144,39 +142,25 @@ export async function exportAsPNG(options: ExportOptions): Promise<void> {
       const strokeCanvas = document.createElement('canvas');
       strokeCanvas.width = origW;
       strokeCanvas.height = origH;
-      const sCtx = strokeCanvas.getContext('2d')!;
 
       const sw = strokeWidth * Math.min(scaleX, scaleY);
 
       if (strokeStyle === 'solid') {
         renderPatternStroke(strokeCanvas, portraitImg, sw, strokeColor);
       } else {
-        let strokeStyleValue: CanvasRenderingContext2D['strokeStyle'];
-
-        if (strokeStyle === 'dots') {
-          const r = Math.max(2, sw * 0.22 * strokeElementScale);
-          strokeStyleValue = createDotsPattern(sCtx, r, r * 1.6, strokeColor, strokeDensity);
-        } else if (strokeStyle === 'stripes') {
-          strokeStyleValue = createStripesPattern(sCtx, sw * strokeElementScale, 0, strokeAngle, strokeColor, strokeDensity);
-        } else if (strokeStyle === 'stars') {
-          const sz = Math.max(5, sw * 0.42 * strokeElementScale);
-          strokeStyleValue = createStarsPattern(sCtx, sz, sz * 1.1, strokeColor, strokeDensity);
-        } else {
-          const sz = Math.max(5, sw * 0.42 * strokeElementScale);
-          strokeStyleValue = createLettersPattern(sCtx, sz, sz * 1.1, strokeColor, strokeDensity);
-        }
-
-        if (strokeOpacity < 1) {
-          const tmp = document.createElement('canvas');
-          tmp.width = origW;
-          tmp.height = origH;
-          renderPatternStroke(tmp, portraitImg, sw, strokeStyleValue);
-          sCtx.globalAlpha = strokeOpacity;
-          sCtx.drawImage(tmp, 0, 0);
-          sCtx.globalAlpha = 1;
-        } else {
-          renderPatternStroke(strokeCanvas, portraitImg, sw, strokeStyleValue);
-        }
+        renderElementStroke({
+          canvas: strokeCanvas,
+          portraitImage: portraitImg,
+          strokeWidth: sw,
+          strokeColor,
+          strokeOpacity,
+          elementSize: strokeElementScale,
+          density: strokeDensity,
+          strokeStyle: strokeStyle as 'dots' | 'stripes' | 'stars' | 'letters',
+          strokeAngle,
+          randomColor: strokeRandomColor,
+          letter: strokeLetter,
+        });
       }
 
       ctx.drawImage(strokeCanvas, 0, 0);

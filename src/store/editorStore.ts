@@ -21,6 +21,8 @@ interface EditorState {
   strokeDensity: number;
   strokeAngle: number;
   strokeOpacity: number;
+  strokeRandomColor: boolean;
+  strokeLetter: string;
 
   portraitFilter: PortraitFilter;
 
@@ -46,6 +48,8 @@ interface EditorState {
   setStrokeDensity: (v: number) => void;
   setStrokeAngle: (v: number) => void;
   setStrokeOpacity: (v: number) => void;
+  setStrokeRandomColor: (v: boolean) => void;
+  setStrokeLetter: (v: string) => void;
 
   setPortraitFilter: (f: PortraitFilter) => void;
   setActiveTab: (t: 'upload' | 'layers' | 'stroke' | 'filter') => void;
@@ -74,6 +78,8 @@ export const useEditorStore = create<EditorState>((set) => ({
   strokeDensity: 1,
   strokeAngle: 45,
   strokeOpacity: 1,
+  strokeRandomColor: false,
+  strokeLetter: 'random',
 
   portraitFilter: 'normal',
 
@@ -144,6 +150,8 @@ export const useEditorStore = create<EditorState>((set) => ({
   setStrokeDensity: (v) => set({ strokeDensity: v }),
   setStrokeAngle: (v) => set({ strokeAngle: v }),
   setStrokeOpacity: (v) => set({ strokeOpacity: v }),
+  setStrokeRandomColor: (v) => set({ strokeRandomColor: v }),
+  setStrokeLetter: (v) => set({ strokeLetter: v }),
   setPortraitFilter: (f) => set({ portraitFilter: f }),
   setActiveTab: (t) => set({ activeTab: t }),
 
@@ -158,6 +166,8 @@ export const useEditorStore = create<EditorState>((set) => ({
       strokeDensity: 1,
       strokeAngle: 45,
       strokeOpacity: 1,
+      strokeRandomColor: false,
+      strokeLetter: 'random',
       portraitFilter: 'normal',
     }),
 
@@ -183,6 +193,8 @@ export const useEditorStore = create<EditorState>((set) => ({
       strokeDensity: 1,
       strokeAngle: 45,
       strokeOpacity: 1,
+      strokeRandomColor: false,
+      strokeLetter: 'random',
       portraitFilter: 'normal',
       activeTab: 'upload',
     });

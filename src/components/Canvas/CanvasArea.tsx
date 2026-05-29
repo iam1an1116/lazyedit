@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { useEditorStore } from '../../store/editorStore';
 import { BackgroundLayer } from './BackgroundLayer';
 import { ElementsLayer } from './ElementsLayer';
+import { StrokeLayer } from './StrokeLayer';
 import { PortraitLayer } from './PortraitLayer';
 
 export function CanvasArea() {
@@ -23,6 +24,7 @@ export function CanvasArea() {
       >
         <BackgroundLayer />
         <ElementsLayer />
+        <StrokeLayer />
         <PortraitLayer />
       </div>
     </div>

@@ -1,15 +1,6 @@
-import { useRef, useEffect, useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useEditorStore } from '../../store/editorStore';
-import { renderPatternStroke } from '../../utils/contour';
-import {
-  createDotsPattern,
-  createStripesPattern,
-  createStarsPattern,
-  createLettersPattern,
-} from '../../utils/patternStroke';
 import { getFilterCSS } from '../../utils/filters';
-
-const PATTERN_STYLES = ['dots', 'stripes', 'stars', 'letters'] as const;
 
 export function PortraitLayer() {
   const portraitUrl = useEditorStore((s) => s.portraitUrl);
@@ -17,101 +8,11 @@ export function PortraitLayer() {
   const strokeStyle = useEditorStore((s) => s.strokeStyle);
   const strokeWidth = useEditorStore((s) => s.strokeWidth);
   const strokeColor = useEditorStore((s) => s.strokeColor);
-  const strokeElementScale = useEditorStore((s) => s.strokeElementScale);
-  const strokeDensity = useEditorStore((s) => s.strokeDensity);
-  const strokeAngle = useEditorStore((s) => s.strokeAngle);
-  const strokeOpacity = useEditorStore((s) => s.strokeOpacity);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const strokeCanvasRef = useRef<HTMLCanvasElement>(null);
-  const [dims, setDims] = useState({ w: 0, h: 0 });
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const obs = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const { width, height } = entry.contentRect;
-        if (width > 0 && height > 0) {
-          setDims({ w: width, h: height });
-        }
-      }
-    });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
 
   const svgFilterId = useMemo(
     () => `stroke-${strokeWidth}-${strokeColor.replace('#', '')}`,
     [strokeWidth, strokeColor]
   );
-
-  // Canvas-based stroke rendering
-  useEffect(() => {
-    const isPattern = PATTERN_STYLES.includes(strokeStyle as typeof PATTERN_STYLES[number]);
-    if (!isPattern) return;
-    if (!portraitUrl) return;
-
-    const canvas = strokeCanvasRef.current;
-    if (!canvas) return;
-
-    const containerEl = containerRef.current;
-    const cw = dims.w || containerEl?.clientWidth || 0;
-    const ch = dims.h || containerEl?.clientHeight || 0;
-    if (cw === 0 || ch === 0) return;
-
-    let cancelled = false;
-    const img = new Image();
-    img.onload = () => {
-      if (cancelled) return;
-
-      canvas.width = cw;
-      canvas.height = ch;
-
-      const ctx = canvas.getContext('2d')!;
-      let style: CanvasRenderingContext2D['strokeStyle'];
-
-      if (strokeStyle === 'dots') {
-        const r = Math.max(2, strokeWidth * 0.22 * strokeElementScale);
-        style = createDotsPattern(ctx, r, r * 1.6, strokeColor, strokeDensity);
-      } else if (strokeStyle === 'stripes') {
-        style = createStripesPattern(ctx, strokeWidth * strokeElementScale, 0, strokeAngle, strokeColor, strokeDensity);
-      } else if (strokeStyle === 'stars') {
-        const sz = Math.max(5, strokeWidth * 0.42 * strokeElementScale);
-        style = createStarsPattern(ctx, sz, sz * 1.1, strokeColor, strokeDensity);
-      } else {
-        const sz = Math.max(5, strokeWidth * 0.42 * strokeElementScale);
-        style = createLettersPattern(ctx, sz, sz * 1.1, strokeColor, strokeDensity);
-      }
-
-      if (strokeOpacity < 1) {
-        const tmp = document.createElement('canvas');
-        tmp.width = cw;
-        tmp.height = ch;
-        renderPatternStroke(tmp, img, strokeWidth, style);
-        const ctx2 = canvas.getContext('2d')!;
-        ctx2.globalAlpha = strokeOpacity;
-        ctx2.drawImage(tmp, 0, 0);
-        ctx2.globalAlpha = 1;
-      } else {
-        renderPatternStroke(canvas, img, strokeWidth, style);
-      }
-    };
-    img.src = portraitUrl;
-
-    return () => { cancelled = true; };
-  }, [portraitUrl, strokeStyle, strokeWidth, strokeColor, strokeElementScale, strokeDensity, strokeAngle, strokeOpacity, dims.w, dims.h]);
-
-  // Clear canvas when stroke style changes away from pattern
-  useEffect(() => {
-    const isPattern = PATTERN_STYLES.includes(strokeStyle as typeof PATTERN_STYLES[number]);
-    if (!isPattern) {
-      const canvas = strokeCanvasRef.current;
-      if (canvas) {
-        const ctx = canvas.getContext('2d');
-        if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
-      }
-    }
-  }, [strokeStyle]);
 
   if (!portraitUrl) {
     return (
@@ -126,7 +27,7 @@ export function PortraitLayer() {
   const filterCSS = portraitFilter === 'glitch' ? 'none' : getFilterCSS(portraitFilter);
 
   return (
-    <div ref={containerRef} className="absolute inset-0 z-30 pointer-events-none overflow-hidden rounded-2xl">
+    <div className="absolute inset-0 z-30 pointer-events-none overflow-hidden rounded-2xl">
       {strokeStyle === 'solid' && (
         <svg width="0" height="0" style={{ position: 'absolute' }}>
           <defs>
@@ -178,15 +79,6 @@ export function PortraitLayer() {
           />
         </>
       )}
-
-      <canvas
-        ref={strokeCanvasRef}
-        className="absolute inset-0 w-full h-full"
-        style={{
-          pointerEvents: 'none',
-          display: PATTERN_STYLES.includes(strokeStyle as typeof PATTERN_STYLES[number]) ? 'block' : 'none',
-        }}
-      />
     </div>
   );
 }

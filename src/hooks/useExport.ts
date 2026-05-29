@@ -22,6 +22,8 @@ export function useExport() {
         strokeDensity: store.strokeDensity,
         strokeAngle: store.strokeAngle,
         strokeOpacity: store.strokeOpacity,
+        strokeRandomColor: store.strokeRandomColor,
+        strokeLetter: store.strokeLetter,
         portraitFilter: store.portraitFilter,
       });
     },

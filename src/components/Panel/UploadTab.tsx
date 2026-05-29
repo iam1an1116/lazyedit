@@ -24,6 +24,8 @@ export function UploadTab() {
   const setStrokeDensity = useEditorStore((s) => s.setStrokeDensity);
   const setStrokeAngle = useEditorStore((s) => s.setStrokeAngle);
   const setStrokeOpacity = useEditorStore((s) => s.setStrokeOpacity);
+  const setStrokeRandomColor = useEditorStore((s) => s.setStrokeRandomColor);
+  const setStrokeLetter = useEditorStore((s) => s.setStrokeLetter);
   const { remove } = useBackgroundRemoval();
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -31,6 +33,7 @@ export function UploadTab() {
     applyRandomStroke({
       setStrokeStyle, setStrokeColor, setStrokeWidth,
       setStrokeElementScale, setStrokeDensity, setStrokeAngle, setStrokeOpacity,
+      setStrokeRandomColor, setStrokeLetter,
     });
     await generateRandomFill({
       imageDimensions,
@@ -38,7 +41,7 @@ export function UploadTab() {
       addElement,
       resetElements,
     });
-  }, [imageDimensions, portraitUrl, addElement, resetElements, setStrokeStyle, setStrokeColor, setStrokeWidth, setStrokeElementScale, setStrokeDensity, setStrokeAngle, setStrokeOpacity]);
+  }, [imageDimensions, portraitUrl, addElement, resetElements, setStrokeStyle, setStrokeColor, setStrokeWidth, setStrokeElementScale, setStrokeDensity, setStrokeAngle, setStrokeOpacity, setStrokeRandomColor, setStrokeLetter]);
 
   const handleFile = useCallback(
     async (file: File) => {

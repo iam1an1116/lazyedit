@@ -1,5 +1,19 @@
 import type { Point } from '../types';
 
+interface ElementStrokeOptions {
+  canvas: HTMLCanvasElement;
+  portraitImage: HTMLImageElement;
+  strokeWidth: number;
+  strokeColor: string;
+  strokeOpacity: number;
+  elementSize: number;
+  density: number;
+  strokeStyle: 'dots' | 'stripes' | 'stars' | 'letters';
+  strokeAngle?: number;
+  randomColor?: boolean;
+  letter?: string;
+}
+
 /**
  * Extract contour points from a portrait image's alpha channel.
  */
@@ -100,4 +114,176 @@ export function renderPatternStroke(
   ctx.fillStyle = strokeStyle;
   ctx.fillRect(0, 0, W, H);
   ctx.globalCompositeOperation = 'source-over';
+}
+
+function hslToHex(h: number, s: number, l: number): string {
+  s /= 100;
+  l /= 100;
+  const a = s * Math.min(l, 1 - l);
+  const f = (n: number) => {
+    const k = (n + h / 30) % 12;
+    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * color).toString(16).padStart(2, '0');
+  };
+  return `#${f(0)}${f(8)}${f(4)}`;
+}
+
+function randomSaturatedHex(): string {
+  const h = Math.floor(Math.random() * 360);
+  return hslToHex(h, 100, 50);
+}
+
+/**
+ * Draw a 5-pointed star.
+ */
+function drawStar(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  outerR: number,
+  innerR: number,
+  color: string
+): void {
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const r = i % 2 === 0 ? outerR : innerR;
+    const angle = (Math.PI / 2) + (Math.PI * i / 5);
+    const x = cx - r * Math.cos(angle);
+    const y = cy - r * Math.sin(angle);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fill();
+}
+
+/**
+ * Render stroke using independent elements (dots, stripes, stars, letters).
+ * Builds a ring mask, samples positions within it, and draws each element individually.
+ */
+export function renderElementStroke(options: ElementStrokeOptions): void {
+  const {
+    canvas,
+    portraitImage,
+    strokeWidth,
+    strokeColor,
+    strokeOpacity,
+    elementSize,
+    density,
+    strokeStyle,
+    strokeAngle = 0,
+    randomColor = false,
+    letter = 'random',
+  } = options;
+
+  const W = canvas.width;
+  const H = canvas.height;
+  if (W === 0 || H === 0) return;
+
+  const ctx = canvas.getContext('2d')!;
+  ctx.clearRect(0, 0, W, H);
+
+  // Step 1: Build ring mask (same dilation approach as renderPatternStroke)
+  const half = Math.ceil(strokeWidth / 2);
+
+  const canvasA = document.createElement('canvas');
+  canvasA.width = W;
+  canvasA.height = H;
+  const ctxA = canvasA.getContext('2d')!;
+  for (let angle = 0; angle < 360; angle += 15) {
+    const rad = (angle * Math.PI) / 180;
+    const dx = Math.round(Math.cos(rad) * half);
+    const dy = Math.round(Math.sin(rad) * half);
+    ctxA.drawImage(portraitImage, dx, dy, W, H);
+  }
+
+  const canvasB = document.createElement('canvas');
+  canvasB.width = W;
+  canvasB.height = H;
+  const ctxB = canvasB.getContext('2d')!;
+  ctxB.drawImage(canvasA, 0, 0);
+  ctxB.globalCompositeOperation = 'destination-out';
+  ctxB.drawImage(portraitImage, 0, 0, W, H);
+  ctxB.globalCompositeOperation = 'source-over';
+
+  ctx.globalAlpha = strokeOpacity;
+
+  if (strokeStyle === 'stripes') {
+    // Stripes: use original CanvasPattern approach (ring mask + pattern fill)
+    const tileScale = 1 / density;
+    const period = Math.max(4, Math.round(strokeWidth * 2 * tileScale));
+    const size = period * 4;
+    const patternCanvas = document.createElement('canvas');
+    patternCanvas.width = size;
+    patternCanvas.height = size;
+    const pCtx = patternCanvas.getContext('2d')!;
+
+    pCtx.fillStyle = '#FFFFFF';
+    pCtx.fillRect(0, 0, size, size);
+
+    pCtx.save();
+    pCtx.translate(size / 2, size / 2);
+    pCtx.rotate((strokeAngle * Math.PI) / 180);
+    pCtx.translate(-size / 2, -size / 2);
+
+    pCtx.fillStyle = strokeColor;
+    for (let i = -size; i < size * 2; i += period) {
+      pCtx.fillRect(i, -size, period / 2, size * 3);
+    }
+
+    pCtx.restore();
+
+    const pattern = ctx.createPattern(patternCanvas, 'repeat')!;
+
+    ctx.drawImage(canvasB, 0, 0);
+    ctx.globalCompositeOperation = 'source-in';
+    ctx.fillStyle = pattern;
+    ctx.fillRect(0, 0, W, H);
+    ctx.globalCompositeOperation = 'source-over';
+  } else {
+    // Dots, stars, letters: sample positions in ring, draw individual elements
+    const maskData = ctxB.getImageData(0, 0, W, H).data;
+
+    let step: number;
+    let elemR: number;
+
+    if (strokeStyle === 'dots') {
+      const r = Math.max(2, strokeWidth * 0.22 * elementSize);
+      step = Math.max(8, Math.round(r * 3.6 / density));
+      elemR = r;
+    } else {
+      const sz = Math.max(5, strokeWidth * 0.42 * elementSize);
+      step = Math.max(12, Math.round(sz * 2.1 / density));
+      elemR = sz;
+    }
+
+    for (let y = 0; y < H; y += step) {
+      for (let x = 0; x < W; x += step) {
+        const idx = (y * W + x) * 4;
+        if (maskData[idx + 3] === 0) continue;
+
+        const color = randomColor ? randomSaturatedHex() : strokeColor;
+        ctx.fillStyle = color;
+
+        if (strokeStyle === 'dots') {
+          ctx.beginPath();
+          ctx.arc(x, y, elemR, 0, Math.PI * 2);
+          ctx.fill();
+        } else if (strokeStyle === 'stars') {
+          drawStar(ctx, x, y, elemR, elemR * 0.382, color);
+        } else {
+          const ch = letter === 'random'
+            ? 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)]
+            : letter;
+          ctx.font = `bold ${elemR}px sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(ch, x, y);
+        }
+      }
+    }
+  }
+
+  ctx.globalAlpha = 1;
 }
