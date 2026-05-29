@@ -17,6 +17,8 @@ interface ExportOptions {
   strokeStyle: StrokeStyle;
   strokeWidth: number;
   strokeColor: string;
+  strokeElementScale: number;
+  strokeDensity: number;
   portraitFilter: PortraitFilter;
 }
 
@@ -33,6 +35,8 @@ export async function exportAsPNG(options: ExportOptions): Promise<void> {
     strokeStyle,
     strokeWidth,
     strokeColor,
+    strokeElementScale,
+    strokeDensity,
     portraitFilter,
   } = options;
 
@@ -146,16 +150,16 @@ export async function exportAsPNG(options: ExportOptions): Promise<void> {
         let strokeStyleValue: CanvasRenderingContext2D['strokeStyle'];
 
         if (strokeStyle === 'dots') {
-          const r = Math.max(2, sw * 0.22);
-          strokeStyleValue = createDotsPattern(sCtx, r, r * 1.6, strokeColor);
+          const r = Math.max(2, sw * 0.22 * strokeElementScale);
+          strokeStyleValue = createDotsPattern(sCtx, r, r * 1.6, strokeColor, strokeDensity);
         } else if (strokeStyle === 'stripes') {
-          strokeStyleValue = createStripesPattern(sCtx, sw, 0, 45, strokeColor);
+          strokeStyleValue = createStripesPattern(sCtx, sw * strokeElementScale, 0, 45, strokeColor, strokeDensity);
         } else if (strokeStyle === 'stars') {
-          const sz = Math.max(5, sw * 0.42);
-          strokeStyleValue = createStarsPattern(sCtx, sz, sz * 1.1, strokeColor);
+          const sz = Math.max(5, sw * 0.42 * strokeElementScale);
+          strokeStyleValue = createStarsPattern(sCtx, sz, sz * 1.1, strokeColor, strokeDensity);
         } else {
-          const sz = Math.max(5, sw * 0.42);
-          strokeStyleValue = createLettersPattern(sCtx, sz, sz * 1.1, strokeColor);
+          const sz = Math.max(5, sw * 0.42 * strokeElementScale);
+          strokeStyleValue = createLettersPattern(sCtx, sz, sz * 1.1, strokeColor, strokeDensity);
         }
 
         renderPatternStroke(strokeCanvas, portraitImg, sw, strokeStyleValue);

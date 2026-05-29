@@ -17,6 +17,8 @@ interface EditorState {
   strokeStyle: StrokeStyle;
   strokeWidth: number;
   strokeColor: string;
+  strokeElementScale: number;
+  strokeDensity: number;
 
   portraitFilter: PortraitFilter;
 
@@ -38,6 +40,8 @@ interface EditorState {
   setStrokeStyle: (s: StrokeStyle) => void;
   setStrokeWidth: (w: number) => void;
   setStrokeColor: (c: string) => void;
+  setStrokeElementScale: (v: number) => void;
+  setStrokeDensity: (v: number) => void;
 
   setPortraitFilter: (f: PortraitFilter) => void;
   setActiveTab: (t: 'upload' | 'layers' | 'stroke' | 'filter') => void;
@@ -62,6 +66,8 @@ export const useEditorStore = create<EditorState>((set) => ({
   strokeStyle: 'none',
   strokeWidth: 12,
   strokeColor: '#FF4500',
+  strokeElementScale: 1,
+  strokeDensity: 1,
 
   portraitFilter: 'normal',
 
@@ -128,6 +134,8 @@ export const useEditorStore = create<EditorState>((set) => ({
   setStrokeStyle: (s) => set({ strokeStyle: s }),
   setStrokeWidth: (w) => set({ strokeWidth: w }),
   setStrokeColor: (c) => set({ strokeColor: c }),
+  setStrokeElementScale: (v) => set({ strokeElementScale: v }),
+  setStrokeDensity: (v) => set({ strokeDensity: v }),
   setPortraitFilter: (f) => set({ portraitFilter: f }),
   setActiveTab: (t) => set({ activeTab: t }),
 
@@ -138,6 +146,8 @@ export const useEditorStore = create<EditorState>((set) => ({
       strokeStyle: 'none',
       strokeWidth: 12,
       strokeColor: '#FF4500',
+      strokeElementScale: 1,
+      strokeDensity: 1,
       portraitFilter: 'normal',
     }),
 
@@ -159,6 +169,8 @@ export const useEditorStore = create<EditorState>((set) => ({
       strokeStyle: 'none',
       strokeWidth: 12,
       strokeColor: '#FF4500',
+      strokeElementScale: 1,
+      strokeDensity: 1,
       portraitFilter: 'normal',
       activeTab: 'upload',
     });

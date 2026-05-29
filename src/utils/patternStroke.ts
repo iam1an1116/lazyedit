@@ -5,9 +5,11 @@ export function createDotsPattern(
   ctx: CanvasRenderingContext2D,
   dotRadius: number,
   spacing: number,
-  color: string
+  color: string,
+  density = 1
 ): CanvasPattern {
-  const size = Math.max(8, Math.round(dotRadius * 2 + spacing));
+  const tileScale = 1 / density;
+  const size = Math.max(8, Math.round((dotRadius * 2 + spacing) * tileScale));
   const patternCanvas = document.createElement('canvas');
   patternCanvas.width = size;
   patternCanvas.height = size;
@@ -29,9 +31,11 @@ export function createStripesPattern(
   stripeWidth: number,
   _gap: number,
   _angle: number,
-  color: string
+  color: string,
+  density = 1
 ): CanvasPattern {
-  const period = Math.max(4, Math.round(stripeWidth * 2));
+  const tileScale = 1 / density;
+  const period = Math.max(4, Math.round(stripeWidth * 2 * tileScale));
   const size = period * 4;
   const patternCanvas = document.createElement('canvas');
   patternCanvas.width = size;
@@ -63,9 +67,11 @@ export function createStarsPattern(
   ctx: CanvasRenderingContext2D,
   starSize: number,
   spacing: number,
-  color: string
+  color: string,
+  density = 1
 ): CanvasPattern {
-  const size = Math.max(12, Math.round(starSize + spacing));
+  const tileScale = 1 / density;
+  const size = Math.max(12, Math.round((starSize + spacing) * tileScale));
   const patternCanvas = document.createElement('canvas');
   patternCanvas.width = size;
   patternCanvas.height = size;
@@ -83,9 +89,11 @@ export function createLettersPattern(
   ctx: CanvasRenderingContext2D,
   fontSize: number,
   spacing: number,
-  color: string
+  color: string,
+  density = 1
 ): CanvasPattern {
-  const size = Math.max(12, Math.round(fontSize + spacing));
+  const tileScale = 1 / density;
+  const size = Math.max(12, Math.round((fontSize + spacing) * tileScale));
   const patternCanvas = document.createElement('canvas');
   patternCanvas.width = size;
   patternCanvas.height = size;

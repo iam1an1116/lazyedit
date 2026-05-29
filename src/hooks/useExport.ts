@@ -18,6 +18,8 @@ export function useExport() {
         strokeStyle: store.strokeStyle,
         strokeWidth: store.strokeWidth,
         strokeColor: store.strokeColor,
+        strokeElementScale: store.strokeElementScale,
+        strokeDensity: store.strokeDensity,
         portraitFilter: store.portraitFilter,
       });
     },

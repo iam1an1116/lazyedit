@@ -14,11 +14,16 @@ export function StrokeTab() {
   const strokeStyle = useEditorStore((s) => s.strokeStyle);
   const strokeWidth = useEditorStore((s) => s.strokeWidth);
   const strokeColor = useEditorStore((s) => s.strokeColor);
+  const strokeElementScale = useEditorStore((s) => s.strokeElementScale);
+  const strokeDensity = useEditorStore((s) => s.strokeDensity);
   const portraitUrl = useEditorStore((s) => s.portraitUrl);
   const setStrokeStyle = useEditorStore((s) => s.setStrokeStyle);
   const setStrokeWidth = useEditorStore((s) => s.setStrokeWidth);
   const setStrokeColor = useEditorStore((s) => s.setStrokeColor);
+  const setStrokeElementScale = useEditorStore((s) => s.setStrokeElementScale);
+  const setStrokeDensity = useEditorStore((s) => s.setStrokeDensity);
   const disabled = !portraitUrl;
+  const isPattern = strokeStyle !== 'none' && strokeStyle !== 'solid';
 
   return (
     <div className="space-y-5 animate-fade-in">
@@ -58,7 +63,7 @@ export function StrokeTab() {
             <input
               type="range"
               min="4"
-              max="32"
+              max="64"
               value={strokeWidth}
               onChange={(e) => setStrokeWidth(Number(e.target.value))}
               className="w-full"
@@ -77,6 +82,42 @@ export function StrokeTab() {
               <span className="text-xs font-mono text-canvas-muted">{strokeColor}</span>
             </div>
           </div>
+
+          {isPattern && (
+            <>
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs text-canvas-muted">
+                  <span>元素大小</span>
+                  <span className="font-mono text-canvas-text">{strokeElementScale.toFixed(1)}x</span>
+                </div>
+                <input
+                  type="range"
+                  min="0.3"
+                  max="3"
+                  step="0.1"
+                  value={strokeElementScale}
+                  onChange={(e) => setStrokeElementScale(Number(e.target.value))}
+                  className="w-full"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex justify-between text-xs text-canvas-muted">
+                  <span>密度</span>
+                  <span className="font-mono text-canvas-text">{strokeDensity.toFixed(1)}x</span>
+                </div>
+                <input
+                  type="range"
+                  min="0.3"
+                  max="3"
+                  step="0.1"
+                  value={strokeDensity}
+                  onChange={(e) => setStrokeDensity(Number(e.target.value))}
+                  className="w-full"
+                />
+              </div>
+            </>
+          )}
 
         </>
       )}
