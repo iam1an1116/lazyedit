@@ -1,8 +1,8 @@
 import { useCallback, useRef } from 'react';
-import { Upload, Image as ImageIcon, X, RotateCcw, Zap } from 'lucide-react';
+import { Upload, Image as ImageIcon, X, RotateCcw, Zap, Quote } from 'lucide-react';
 import { useEditorStore } from '../../store/editorStore';
 import { useBackgroundRemoval } from '../../hooks/useBackgroundRemoval';
-import { generateRandomFill } from '../../utils/randomFill';
+import { generateRandomFill, generateRandomWords } from '../../utils/randomFill';
 import { applyRandomStroke } from '../../utils/randomStroke';
 
 export function UploadTab() {
@@ -42,6 +42,11 @@ export function UploadTab() {
       resetElements,
     });
   }, [imageDimensions, portraitUrl, addElement, resetElements, setStrokeStyle, setStrokeColor, setStrokeWidth, setStrokeElementScale, setStrokeDensity, setStrokeAngle, setStrokeOpacity, setStrokeRandomColor, setStrokeLetter]);
+
+  const handleWords = useCallback(async () => {
+    if (!portraitUrl) return;
+    await generateRandomWords({ portraitUrl, addElement });
+  }, [portraitUrl, addElement]);
 
   const handleFile = useCallback(
     async (file: File) => {
@@ -165,6 +170,13 @@ export function UploadTab() {
           >
             <Zap className="w-4 h-4" />
             <span>LAZY</span>
+          </button>
+          <button
+            onClick={handleWords}
+            className="w-full py-2.5 bg-white text-canvas-text text-xs font-medium border border-canvas-border rounded-xl hover:bg-canvas-hover transition-colors flex items-center justify-center space-x-1.5"
+          >
+            <Quote className="w-3.5 h-3.5" />
+            <span>随便说点</span>
           </button>
         </div>
       )}

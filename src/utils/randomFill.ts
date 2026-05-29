@@ -1,5 +1,6 @@
 import type { CanvasElement, TextElement, ShapeElement, ShapeType } from '../types';
 import { getPortraitBounds } from './portraitBounds';
+import { extractContour } from './contour';
 
 type RandomElementType = 'text' | 'rectangle' | 'circle' | 'triangle' | 'star';
 
@@ -234,5 +235,177 @@ export async function generateRandomFill(opts: RandomFillOptions): Promise<void>
       };
       addElement(el);
     }
+  }
+}
+
+function randomWord(): string {
+  const len = 6 + Math.floor(Math.random() * 10);
+  return Array.from({ length: len }, () =>
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)]
+  ).join('');
+}
+
+export async function generateRandomWords(opts: {
+  portraitUrl: string;
+  addElement: (el: CanvasElement) => void;
+}): Promise<void> {
+  const { portraitUrl, addElement } = opts;
+
+  const container = document.getElementById('canvasContainer');
+  const cw = container?.clientWidth || 320;
+  const ch = container?.clientHeight || 427;
+
+  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const i = new Image();
+    i.onload = () => resolve(i);
+    i.onerror = reject;
+    i.src = portraitUrl;
+  });
+
+  const bounds = await getPortraitBounds(portraitUrl, cw, ch);
+  if (!bounds) return;
+
+  // Extract edge points from portrait
+  const edgePoints = extractContour(img);
+  if (edgePoints.length < 10) return;
+
+  // Map image coords to container coords (object-fit: cover)
+  const imgW = img.naturalWidth;
+  const imgH = img.naturalHeight;
+  const containerAspect = cw / ch;
+  const imgAspect = imgW / imgH;
+
+  let visX: number, visY: number, visW: number, visH: number;
+  if (imgAspect > containerAspect) {
+    visH = 1; visW = containerAspect / imgAspect;
+    visX = (1 - visW) / 2; visY = 0;
+  } else {
+    visW = 1; visH = imgAspect / containerAspect;
+    visX = 0; visY = (1 - visH) / 2;
+  }
+
+  const mapped = edgePoints.map(p => ({
+    x: (visX + (p.x / imgW) * visW) * cw,
+    y: (visY + (p.y / imgH) * visH) * ch,
+  }));
+
+  // Filter to portrait bounds
+  const inside = mapped.filter(
+    p => p.x >= bounds.x && p.x <= bounds.x + bounds.width &&
+         p.y >= bounds.y && p.y <= bounds.y + bounds.height
+  );
+  if (inside.length < 10) return;
+
+  // Grid-based sampling for even distribution
+  const count = Math.max(3, Math.min(12, Math.round(inside.length / 80)));
+  const gridCols = Math.ceil(Math.sqrt(count * (bounds.width / bounds.height)));
+  const gridRows = Math.ceil(count / gridCols);
+  const cellW = bounds.width / gridCols;
+  const cellH = bounds.height / gridRows;
+
+  const cells = Array.from({ length: gridCols * gridRows }, (_, i) => i);
+  for (let i = cells.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [cells[i], cells[j]] = [cells[j], cells[i]];
+  }
+
+  const baseFontSize = Math.max(14, Math.round(Math.min(bounds.width, bounds.height) * 0.06));
+
+  // Pre-compute alpha data for edge direction detection
+  const scanW = 200;
+  const scanH = Math.round(200 * (imgH / imgW));
+  const alphaCanvas = document.createElement('canvas');
+  alphaCanvas.width = scanW;
+  alphaCanvas.height = scanH;
+  const alphaCtx = alphaCanvas.getContext('2d')!;
+  alphaCtx.drawImage(img, 0, 0, scanW, scanH);
+  const alphaData = alphaCtx.getImageData(0, 0, scanW, scanH).data;
+
+  for (let i = 0; i < Math.min(count, cells.length); i++) {
+    const cellIdx = cells[i];
+    const col = cellIdx % gridCols;
+    const row = Math.floor(cellIdx / gridCols);
+
+    const cellX = bounds.x + col * cellW;
+    const cellY = bounds.y + row * cellH;
+
+    // Find edge points in this cell
+    const cellPoints = inside.filter(
+      p => p.x >= cellX && p.x < cellX + cellW &&
+           p.y >= cellY && p.y < cellY + cellH
+    );
+    if (cellPoints.length === 0) continue;
+
+    const pt = cellPoints[Math.floor(Math.random() * cellPoints.length)];
+
+    // Determine edge direction by checking alpha neighbors
+    const checkX = Math.round(((pt.x / cw) - visX) / visW * scanW);
+    const checkY = Math.round(((pt.y / ch) - visY) / visH * scanH);
+
+    let dx = 0, dy = 0;
+    for (let oy = -3; oy <= 3; oy++) {
+      for (let ox = -3; ox <= 3; ox++) {
+        const nx = checkX + ox;
+        const ny = checkY + oy;
+        if (nx >= 0 && nx < scanW && ny >= 0 && ny < scanH) {
+          const alpha = alphaData[(ny * scanW + nx) * 4 + 3];
+          if (alpha < 30) {
+            dx += ox;
+            dy += oy;
+          }
+        }
+      }
+    }
+    // Outward direction (toward transparent)
+    const len = Math.sqrt(dx * dx + dy * dy) || 1;
+    const outX = dx / len;
+    const outY = dy / len;
+
+    // Tangent direction (perpendicular to normal) = edge direction
+    const tanX = outY;
+    const tanY = -outX;
+    let angle = Math.atan2(tanY, tanX) * 180 / Math.PI;
+    // Normalize to [-90, 90] for readability (keep text left-to-right)
+    if (angle > 90) angle -= 180;
+    if (angle < -90) angle += 180;
+    const rotation = Math.round(angle + (Math.random() - 0.5) * 10);
+
+    const fontSize = baseFontSize + Math.round((Math.random() - 0.5) * baseFontSize * 0.4);
+    const wordW = fontSize * 8;
+    const wordH = fontSize * 1.2;
+
+    // Position: offset inward by 0.5-1.5x fontSize (scales with word, not portrait)
+    const offsetDist = fontSize * (0.5 + Math.random());
+
+    // Offset the word so it overlaps the portrait edge
+    let wx = pt.x - outX * offsetDist;
+    let wy = pt.y - outY * offsetDist;
+
+    // Center the word on the position
+    wx -= wordW / 2;
+    wy -= wordH / 2;
+
+    // Clamp to canvas
+    wx = Math.max(0, Math.min(cw - wordW, wx));
+    wy = Math.max(0, Math.min(ch - wordH, wy));
+
+    addElement({
+      type: 'text',
+      id: genId(),
+      x: Math.round(wx),
+      y: Math.round(wy),
+      width: wordW,
+      height: wordH,
+      content: randomWord(),
+      fontSize,
+      fontFamily: ALL_FONTS[Math.floor(Math.random() * ALL_FONTS.length)].value,
+      color: randomSaturatedHex(),
+      opacity: 0.85 + Math.random() * 0.15,
+      strokeColor: '#000000',
+      strokeWidth: 0,
+      rotation,
+      bold: true,
+      italic: false,
+    });
   }
 }
