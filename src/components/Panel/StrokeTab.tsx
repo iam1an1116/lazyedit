@@ -46,25 +46,25 @@ export function StrokeTab() {
   };
 
   return (
-    <div className="space-y-5 animate-fade-in">
+    <div className="space-y-4 animate-fade-in">
       {disabled && (
-        <div className="p-3 bg-canvas-hover rounded-xl text-xs text-canvas-muted text-center">
+        <div className="p-3 bg-[#111] rounded-xl text-[10px] text-[#444] text-center font-display tracking-wider">
           请先上传图片并完成抠图
         </div>
       )}
 
       <div>
-        <span className="text-xs font-medium text-canvas-muted block mb-3">边缘检测描边样式</span>
-        <div className="grid grid-cols-2 gap-2">
+        <span className="text-[10px] font-display tracking-wider text-[#555] block mb-3">描边样式</span>
+        <div className="grid grid-cols-3 gap-2">
           {strokeOptions.map((opt) => (
             <button
               key={opt.key}
               onClick={() => setStrokeStyle(opt.key)}
               disabled={disabled}
-              className={`p-3 text-xs font-medium rounded-xl border text-center transition-all disabled:opacity-40 ${
+              className={`p-2.5 text-[10px] font-display tracking-wider rounded-lg border transition-all disabled:opacity-20 ${
                 strokeStyle === opt.key
-                  ? 'border-canvas-text bg-canvas-text text-white'
-                  : 'border-canvas-border bg-white'
+                  ? 'border-neon-yellow/50 bg-neon-yellow/10 text-neon-yellow'
+                  : 'border-[#1a1a1a] bg-[#111] text-[#555] hover:border-[#333] hover:text-white'
               }`}
             >
               {opt.label}
@@ -76,9 +76,9 @@ export function StrokeTab() {
       {strokeStyle !== 'none' && (
         <>
           <div className="space-y-2">
-            <div className="flex justify-between text-xs text-canvas-muted">
+            <div className="flex justify-between text-[10px] text-[#555] font-display tracking-wider">
               <span>描边粗细</span>
-              <span className="font-mono text-canvas-text">{strokeWidth}px</span>
+              <span className="font-mono text-white">{strokeWidth}px</span>
             </div>
             <input
               type="range"
@@ -91,23 +91,23 @@ export function StrokeTab() {
           </div>
 
           <div className="space-y-2">
-            <span className="text-xs font-medium text-canvas-muted block">描边颜色</span>
+            <span className="text-[10px] font-display tracking-wider text-[#555] block">描边颜色</span>
             <div className="flex items-center space-x-3">
               <input
                 type="color"
                 value={strokeColor}
                 onChange={(e) => setStrokeColor(e.target.value)}
-                className="w-10 h-10"
-                style={{ opacity: strokeRandomColor ? 0.4 : 1 }}
+                className="w-8 h-8"
+                style={{ opacity: strokeRandomColor ? 0.3 : 1 }}
               />
-              <span className="text-xs font-mono text-canvas-muted">{strokeColor}</span>
+              <span className="text-[10px] font-mono text-[#555]">{strokeColor}</span>
               {isPattern && (
                 <button
                   onClick={() => setStrokeRandomColor(!strokeRandomColor)}
-                  className={`ml-auto flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-[10px] border transition-all ${
+                  className={`ml-auto flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-[10px] border transition-all font-display tracking-wider ${
                     strokeRandomColor
-                      ? 'border-canvas-text bg-canvas-text text-white'
-                      : 'border-canvas-border bg-white text-canvas-muted'
+                      ? 'border-neon-yellow/50 bg-neon-yellow/10 text-neon-yellow'
+                      : 'border-[#1a1a1a] bg-[#111] text-[#555]'
                   }`}
                 >
                   <Palette className="w-3 h-3" />
@@ -120,9 +120,9 @@ export function StrokeTab() {
           {isPattern && (
             <>
               <div className="space-y-2">
-                <div className="flex justify-between text-xs text-canvas-muted">
+                <div className="flex justify-between text-[10px] text-[#555] font-display tracking-wider">
                   <span>元素大小</span>
-                  <span className="font-mono text-canvas-text">{strokeElementScale.toFixed(1)}x</span>
+                  <span className="font-mono text-white">{strokeElementScale.toFixed(1)}x</span>
                 </div>
                 <input
                   type="range"
@@ -136,9 +136,9 @@ export function StrokeTab() {
               </div>
 
               <div className="space-y-2">
-                <div className="flex justify-between text-xs text-canvas-muted">
+                <div className="flex justify-between text-[10px] text-[#555] font-display tracking-wider">
                   <span>密度</span>
-                  <span className="font-mono text-canvas-text">{strokeDensity.toFixed(1)}x</span>
+                  <span className="font-mono text-white">{strokeDensity.toFixed(1)}x</span>
                 </div>
                 <input
                   type="range"
@@ -153,9 +153,9 @@ export function StrokeTab() {
 
               {strokeStyle === 'stripes' && (
                 <div className="space-y-2">
-                  <div className="flex justify-between text-xs text-canvas-muted">
+                  <div className="flex justify-between text-[10px] text-[#555] font-display tracking-wider">
                     <span>条纹角度</span>
-                    <span className="font-mono text-canvas-text">{strokeAngle}°</span>
+                    <span className="font-mono text-white">{strokeAngle}°</span>
                   </div>
                   <input
                     type="range"
@@ -170,7 +170,7 @@ export function StrokeTab() {
 
               {strokeStyle === 'letters' && (
                 <div className="space-y-2">
-                  <span className="text-xs font-medium text-canvas-muted block">字母设置</span>
+                  <span className="text-[10px] font-display tracking-wider text-[#555] block">字母设置</span>
                   <div className="flex items-center space-x-2">
                     <input
                       type="text"
@@ -182,27 +182,27 @@ export function StrokeTab() {
                       }}
                       placeholder="A"
                       disabled={strokeLetter === 'random'}
-                      className="w-12 h-9 text-center text-sm font-mono bg-white border border-canvas-border rounded-lg focus:outline-none focus:border-canvas-text disabled:opacity-40 disabled:bg-canvas-hover"
+                      className="w-12 h-8 text-center text-sm font-mono bg-[#111] border border-[#222] rounded-lg focus:outline-none focus:border-neon-yellow/50 disabled:opacity-30 text-white"
                     />
                     <button
                       onClick={() => setStrokeLetter(strokeLetter === 'random' ? 'A' : 'random')}
-                      className={`flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-[10px] border transition-all ${
+                      className={`flex items-center space-x-1 px-2.5 py-1.5 rounded-lg text-[10px] border transition-all font-display tracking-wider ${
                         strokeLetter === 'random'
-                          ? 'border-canvas-text bg-canvas-text text-white'
-                          : 'border-canvas-border bg-white text-canvas-muted'
+                          ? 'border-neon-yellow/50 bg-neon-yellow/10 text-neon-yellow'
+                          : 'border-[#1a1a1a] bg-[#111] text-[#555]'
                       }`}
                     >
                       <CaseSensitive className="w-3 h-3" />
-                      <span>每字母随机</span>
+                      <span>随机</span>
                     </button>
                   </div>
                 </div>
               )}
 
               <div className="space-y-2">
-                <div className="flex justify-between text-xs text-canvas-muted">
+                <div className="flex justify-between text-[10px] text-[#555] font-display tracking-wider">
                   <span>不透明度</span>
-                  <span className="font-mono text-canvas-text">{Math.round(strokeOpacity * 100)}%</span>
+                  <span className="font-mono text-white">{Math.round(strokeOpacity * 100)}%</span>
                 </div>
                 <input
                   type="range"
@@ -222,9 +222,9 @@ export function StrokeTab() {
       <button
         onClick={randomStroke}
         disabled={disabled}
-        className="w-full py-2.5 bg-canvas-text text-white text-xs font-medium rounded-xl hover:bg-neutral-700 transition-colors disabled:opacity-40 flex items-center justify-center space-x-1.5"
+        className="w-full py-2.5 bg-neon-yellow/10 text-neon-yellow text-[10px] font-display tracking-[0.15em] rounded-xl border border-neon-yellow/20 hover:bg-neon-yellow/20 transition-all disabled:opacity-20 flex items-center justify-center space-x-1.5"
       >
-        <Shuffle className="w-3.5 h-3.5" />
+        <Shuffle className="w-3 h-3" />
         <span>随便描一下</span>
       </button>
     </div>

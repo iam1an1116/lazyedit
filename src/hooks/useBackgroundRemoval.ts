@@ -15,8 +15,13 @@ export function useBackgroundRemoval() {
       try {
         const result = await removeBackground(imageBlob, {
           progress: (key, current, total) => {
-            if (key === 'compute:inference' && total > 0) {
-              setRemoveProgress(Math.round((current / total) * 100));
+            if (total > 0) {
+              const pct = Math.round((current / total) * 100);
+              if (key === 'fetch:model') {
+                setRemoveProgress(Math.round(pct * 0.3));
+              } else if (key === 'compute:inference') {
+                setRemoveProgress(30 + Math.round(pct * 0.7));
+              }
             }
           },
           output: { format: 'image/png' },

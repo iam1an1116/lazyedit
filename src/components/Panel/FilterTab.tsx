@@ -16,13 +16,13 @@ export function FilterTab() {
   const disabled = !portraitUrl;
 
   return (
-    <div className="space-y-4 animate-fade-in">
-      <span className="text-xs font-medium text-canvas-muted block">
-        独立人像图层滤镜（背景不受影响）
+    <div className="space-y-3 animate-fade-in">
+      <span className="text-[10px] font-display tracking-wider text-[#555] block">
+        人像图层滤镜
       </span>
 
       {disabled && (
-        <div className="p-3 bg-canvas-hover rounded-xl text-xs text-canvas-muted text-center">
+        <div className="p-3 bg-[#111] rounded-xl text-[10px] text-[#444] text-center font-display tracking-wider">
           请先上传图片并完成抠图
         </div>
       )}
@@ -34,23 +34,21 @@ export function FilterTab() {
             onClick={() => !disabled && setPortraitFilter(opt.key)}
             className={`flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all ${
               disabled
-                ? 'opacity-40 cursor-not-allowed bg-canvas-hover'
+                ? 'opacity-30 cursor-not-allowed bg-[#0a0a0a]'
                 : portraitFilter === opt.key
-                ? 'bg-canvas-text text-white'
-                : 'bg-canvas-hover hover:bg-canvas-border'
+                ? 'bg-neon-green/10 border border-neon-green/30'
+                : 'bg-[#111] border border-transparent hover:border-[#222]'
             }`}
           >
             <div>
-              <span className="text-xs font-medium">{opt.label}</span>
-              <p className="text-[10px] opacity-60">{opt.desc}</p>
+              <span className={`text-xs font-display tracking-wider ${portraitFilter === opt.key && !disabled ? 'text-neon-green' : ''}`}>
+                {opt.label}
+              </span>
+              <p className="text-[10px] text-[#444]">{opt.desc}</p>
             </div>
-            <input
-              type="radio"
-              name="filter"
-              checked={portraitFilter === opt.key}
-              readOnly
-              className="w-4 h-4 accent-canvas-accent"
-            />
+            <div className={`w-2 h-2 rounded-full transition-all ${
+              portraitFilter === opt.key && !disabled ? 'bg-neon-green' : 'bg-[#222]'
+            }`} />
           </label>
         ))}
       </div>

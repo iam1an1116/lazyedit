@@ -38,8 +38,8 @@ export function LayersTab() {
   const portraitUrl = useEditorStore((s) => s.portraitUrl);
 
   const [randomCount, setRandomCount] = useState(5);
-  const [randomSize, setRandomSize] = useState(1); // 1 = auto
-  const [randomOpacity, setRandomOpacity] = useState(0); // 0 = auto
+  const [randomSize, setRandomSize] = useState(1);
+  const [randomOpacity, setRandomOpacity] = useState(0);
   const [enabledTypes, setEnabledTypes] = useState<RandomElementType[]>(['text', 'rectangle', 'circle', 'triangle', 'star']);
 
   const toggleType = (t: RandomElementType) => {
@@ -109,33 +109,35 @@ export function LayersTab() {
 
   return (
     <div className="space-y-4 animate-fade-in">
-      <span className="text-xs font-medium text-canvas-muted block">在人像背后插入元素</span>
-      <div className="grid grid-cols-2 gap-2 sm:gap-3">
+      <span className="text-[10px] font-display tracking-wider text-[#555] block">在人像背后插入元素</span>
+
+      <div className="grid grid-cols-2 gap-2">
         <button
           onClick={addText}
-          className="flex items-center justify-center space-x-1.5 sm:space-x-2 p-3 sm:p-4 bg-white border border-canvas-deep hover:border-canvas-text rounded-xl sm:rounded-2xl transition-all group"
+          className="flex items-center justify-center space-x-2 p-3 bg-[#111] border border-[#1a1a1a] hover:border-neon-magenta/30 rounded-lg transition-all group"
         >
-          <Type className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-canvas-muted group-hover:text-canvas-text" />
-          <span className="text-[11px] sm:text-xs font-medium">置入文字</span>
+          <Type className="w-3.5 h-3.5 text-[#555] group-hover:text-neon-magenta" />
+          <span className="text-[10px] font-display tracking-wider text-[#555] group-hover:text-neon-magenta">置入文字</span>
         </button>
         <button
           onClick={() => addShape()}
-          className="flex items-center justify-center space-x-1.5 sm:space-x-2 p-3 sm:p-4 bg-white border border-canvas-deep hover:border-canvas-text rounded-xl sm:rounded-2xl transition-all group"
+          className="flex items-center justify-center space-x-2 p-3 bg-[#111] border border-[#1a1a1a] hover:border-neon-magenta/30 rounded-lg transition-all group"
         >
-          <Square className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-canvas-muted group-hover:text-canvas-text" />
-          <span className="text-[11px] sm:text-xs font-medium">置入形状</span>
+          <Square className="w-3.5 h-3.5 text-[#555] group-hover:text-neon-magenta" />
+          <span className="text-[10px] font-display tracking-wider text-[#555] group-hover:text-neon-magenta">置入形状</span>
         </button>
       </div>
 
       {/* Random fill */}
-      <div className="p-3 sm:p-4 bg-canvas-hover rounded-xl sm:rounded-2xl border border-canvas-border space-y-2 sm:space-y-3">
+      <div className="p-4 bg-[#111] rounded-xl border border-[#1a1a1a] space-y-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-canvas-muted">随便塞一下</span>
-          <Shuffle className="w-4 h-4 text-canvas-muted" />
+          <span className="text-[10px] font-display tracking-wider text-[#555]">随便塞一下</span>
+          <Shuffle className="w-3.5 h-3.5 text-[#444]" />
         </div>
-        <div className="flex items-center justify-between text-xs text-canvas-muted">
-          <span>元素数量</span>
-          <span className="font-mono text-canvas-text">{randomCount}</span>
+
+        <div className="flex items-center justify-between text-[10px] text-[#555] font-display tracking-wider">
+          <span>数量</span>
+          <span className="font-mono text-white">{randomCount}</span>
         </div>
         <input
           type="range"
@@ -146,10 +148,9 @@ export function LayersTab() {
           className="w-full"
         />
 
-        {/* 元素大小 */}
-        <div className="flex items-center justify-between text-xs text-canvas-muted">
-          <span>元素大小</span>
-          <span className="font-mono text-canvas-text">{randomSize === 1 ? '自动' : `${Math.round(randomSize * 100)}%`}</span>
+        <div className="flex items-center justify-between text-[10px] text-[#555] font-display tracking-wider">
+          <span>大小</span>
+          <span className="font-mono text-white">{randomSize === 1 ? '自动' : `${Math.round(randomSize * 100)}%`}</span>
         </div>
         <input
           type="range"
@@ -161,10 +162,9 @@ export function LayersTab() {
           className="w-full"
         />
 
-        {/* 不透明度 */}
-        <div className="flex items-center justify-between text-xs text-canvas-muted">
+        <div className="flex items-center justify-between text-[10px] text-[#555] font-display tracking-wider">
           <span>不透明度</span>
-          <span className="font-mono text-canvas-text">{randomOpacity === 0 ? '自动' : `${Math.round(randomOpacity * 100)}%`}</span>
+          <span className="font-mono text-white">{randomOpacity === 0 ? '自动' : `${Math.round(randomOpacity * 100)}%`}</span>
         </div>
         <input
           type="range"
@@ -176,24 +176,23 @@ export function LayersTab() {
           className="w-full"
         />
 
-        {/* 元素类型勾选 */}
         <div className="space-y-1.5">
-          <span className="text-xs text-canvas-muted">元素类型</span>
+          <span className="text-[10px] text-[#444] font-display tracking-wider">元素类型</span>
           <div className="flex flex-wrap gap-1.5">
             {([
               { key: 'text' as RandomElementType, label: '文字', Icon: Type },
               { key: 'star' as RandomElementType, label: '五角星', Icon: Star },
               { key: 'rectangle' as RandomElementType, label: '方块', Icon: Square },
               { key: 'triangle' as RandomElementType, label: '三角形', Icon: Triangle },
-              { key: 'circle' as RandomElementType, label: '圆形', Icon: () => <div className="w-3.5 h-3.5 rounded-full border border-current" /> },
+              { key: 'circle' as RandomElementType, label: '圆形', Icon: () => <div className="w-3 h-3 rounded-full border border-current" /> },
             ]).map(({ key, label, Icon }) => (
               <button
                 key={key}
                 onClick={() => toggleType(key)}
-                className={`flex items-center space-x-1 px-2 py-1 rounded-lg text-[10px] border transition-all ${
+                className={`flex items-center space-x-1 px-2 py-1 rounded-md text-[10px] border transition-all font-display tracking-wider ${
                   enabledTypes.includes(key)
-                    ? 'border-canvas-text bg-canvas-text text-white'
-                    : 'border-canvas-border bg-white text-canvas-muted'
+                    ? 'border-neon-magenta/50 bg-neon-magenta/10 text-neon-magenta'
+                    : 'border-[#1a1a1a] bg-[#0a0a0a] text-[#444]'
                 }`}
               >
                 <Icon className="w-3 h-3" />
@@ -205,7 +204,7 @@ export function LayersTab() {
 
         <button
           onClick={generateRandom}
-          className="w-full py-2.5 bg-canvas-text text-white text-xs font-medium rounded-xl hover:bg-neutral-700 transition-colors"
+          className="w-full py-2.5 bg-neon-magenta/10 text-neon-magenta text-[10px] font-display tracking-[0.15em] rounded-xl border border-neon-magenta/20 hover:bg-neon-magenta/20 transition-all"
         >
           随便塞一下
         </button>
@@ -214,34 +213,34 @@ export function LayersTab() {
       {/* Element list */}
       {elements.length > 0 && (
         <div className="space-y-2">
-          <span className="text-xs font-medium text-canvas-muted block">已添加元素 ({elements.length})</span>
-          <div className="max-h-[200px] overflow-y-auto space-y-1.5 pr-1 scrollbar-thin">
+          <span className="text-[10px] font-display tracking-wider text-[#555] block">已添加 ({elements.length})</span>
+          <div className="max-h-[180px] overflow-y-auto space-y-1.5 pr-1 scrollbar-thin">
           {elements.map((el) => (
             <div
               key={el.id}
               onClick={() => selectElement(el.id)}
-              className={`p-3 rounded-xl border cursor-pointer transition-all flex items-center justify-between ${
+              className={`p-2.5 rounded-lg border cursor-pointer transition-all flex items-center justify-between ${
                 selectedId === el.id
-                  ? 'border-canvas-accent bg-canvas-accent/5'
-                  : 'border-canvas-border bg-white hover:border-canvas-deep'
+                  ? 'border-neon-magenta/40 bg-neon-magenta/5'
+                  : 'border-[#1a1a1a] bg-[#0a0a0a] hover:border-[#222]'
               }`}
             >
               <div className="flex items-center space-x-2">
                 {el.type === 'text' ? (
-                  <Type className="w-3.5 h-3.5 text-canvas-muted" />
+                  <Type className="w-3 h-3 text-[#444]" />
                 ) : el.type === 'shape' && el.shapeType === 'triangle' ? (
-                  <Triangle className="w-3.5 h-3.5 text-canvas-muted" />
+                  <Triangle className="w-3 h-3 text-[#444]" />
                 ) : el.type === 'shape' && el.shapeType === 'star' ? (
-                  <Star className="w-3.5 h-3.5 text-canvas-muted" />
+                  <Star className="w-3 h-3 text-[#444]" />
                 ) : (
-                  <Square className="w-3.5 h-3.5 text-canvas-muted" />
+                  <Square className="w-3 h-3 text-[#444]" />
                 )}
-                <span className="text-xs truncate max-w-[120px]">
+                <span className="text-[10px] font-display tracking-wider truncate max-w-[100px]">
                   {el.type === 'text' ? el.content : el.shapeType === 'triangle' ? '三角形' : el.shapeType === 'star' ? '五角星' : el.shapeType === 'circle' ? '圆形' : '色块'}
                 </span>
               </div>
               <div
-                className="w-4 h-4 rounded-full border border-canvas-border"
+                className="w-3 h-3 rounded-full border border-[#333]"
                 style={{ backgroundColor: el.color }}
               />
             </div>
@@ -252,27 +251,27 @@ export function LayersTab() {
 
       {/* Selected element properties */}
       {selected && (
-        <div className="space-y-3 p-4 bg-canvas-hover rounded-2xl border border-canvas-border">
-          <span className="text-xs font-medium text-canvas-muted block">属性编辑</span>
+        <div className="space-y-3 p-4 bg-[#111] rounded-xl border border-[#1a1a1a]">
+          <span className="text-[10px] font-display tracking-wider text-[#555] block">属性编辑</span>
 
           {selected.type === 'text' && (
             <>
               <label className="block space-y-1">
-                <span className="text-[10px] text-canvas-muted">文字内容</span>
+                <span className="text-[10px] text-[#444] font-display tracking-wider">文字内容</span>
                 <input
                   type="text"
                   value={selected.content}
                   onChange={(e) => updateElement(selected.id, { content: e.target.value })}
-                  className="w-full px-3 py-2 text-xs bg-white border border-canvas-border rounded-xl focus:outline-none focus:border-canvas-text"
+                  className="w-full px-3 py-2 text-xs bg-[#0a0a0a] border border-[#222] rounded-lg focus:outline-none focus:border-neon-magenta/50 text-white"
                 />
               </label>
 
               <label className="block space-y-1">
-                <span className="text-[10px] text-canvas-muted">字体</span>
+                <span className="text-[10px] text-[#444] font-display tracking-wider">字体</span>
                 <select
                   value={selected.fontFamily}
                   onChange={(e) => updateElement(selected.id, { fontFamily: e.target.value })}
-                  className="w-full px-3 py-2 text-xs bg-white border border-canvas-border rounded-xl focus:outline-none focus:border-canvas-text appearance-none cursor-pointer"
+                  className="w-full px-3 py-2 text-xs bg-[#0a0a0a] border border-[#222] rounded-lg focus:outline-none focus:border-neon-magenta/50 appearance-none cursor-pointer text-white"
                 >
                   <optgroup label="极简风格">
                     {FONTS.minimalist.map((f) => (
@@ -289,27 +288,27 @@ export function LayersTab() {
 
               <div className="grid grid-cols-2 gap-2">
                 <label className="block space-y-1">
-                  <span className="text-[10px] text-canvas-muted">字号</span>
+                  <span className="text-[10px] text-[#444] font-display tracking-wider">字号</span>
                   <input
                     type="number"
                     value={selected.fontSize}
                     onChange={(e) => updateElement(selected.id, { fontSize: Number(e.target.value) })}
-                    className="w-full px-3 py-2 text-xs bg-white border border-canvas-border rounded-xl focus:outline-none focus:border-canvas-text"
+                    className="w-full px-3 py-2 text-xs bg-[#0a0a0a] border border-[#222] rounded-lg focus:outline-none focus:border-neon-magenta/50 text-white"
                   />
                 </label>
                 <label className="block space-y-1">
-                  <span className="text-[10px] text-canvas-muted">颜色</span>
+                  <span className="text-[10px] text-[#444] font-display tracking-wider">颜色</span>
                   <input
                     type="color"
                     value={selected.color}
                     onChange={(e) => updateElement(selected.id, { color: e.target.value })}
-                    className="w-full h-[34px] bg-white border border-canvas-border rounded-xl"
+                    className="w-full h-[34px] bg-[#0a0a0a] border border-[#222] rounded-lg"
                   />
                 </label>
               </div>
 
               <label className="block space-y-1">
-                <span className="text-[10px] text-canvas-muted">描边粗细</span>
+                <span className="text-[10px] text-[#444] font-display tracking-wider">描边粗细</span>
                 <input
                   type="range"
                   min="0"
@@ -321,32 +320,32 @@ export function LayersTab() {
               </label>
               {selected.strokeWidth > 0 && (
                 <label className="block space-y-1">
-                  <span className="text-[10px] text-canvas-muted">描边颜色</span>
+                  <span className="text-[10px] text-[#444] font-display tracking-wider">描边颜色</span>
                   <input
                     type="color"
                     value={selected.strokeColor}
                     onChange={(e) => updateElement(selected.id, { strokeColor: e.target.value })}
-                    className="w-full h-[34px] bg-white border border-canvas-border rounded-xl"
+                    className="w-full h-[34px] bg-[#0a0a0a] border border-[#222] rounded-lg"
                   />
                 </label>
               )}
               <div className="flex space-x-2">
                 <button
                   onClick={() => updateElement(selected.id, { bold: !selected.bold })}
-                  className={`px-3 py-1.5 text-xs rounded-xl border transition-all ${
+                  className={`px-3 py-1.5 text-[10px] rounded-lg border transition-all font-display ${
                     selected.bold
-                      ? 'bg-canvas-text text-white border-canvas-text'
-                      : 'bg-white text-canvas-text border-canvas-border'
+                      ? 'bg-neon-magenta/10 text-neon-magenta border-neon-magenta/30'
+                      : 'bg-[#0a0a0a] text-[#444] border-[#222]'
                   }`}
                 >
                   B
                 </button>
                 <button
                   onClick={() => updateElement(selected.id, { italic: !selected.italic })}
-                  className={`px-3 py-1.5 text-xs rounded-xl border transition-all italic ${
+                  className={`px-3 py-1.5 text-[10px] rounded-lg border transition-all italic font-display ${
                     selected.italic
-                      ? 'bg-canvas-text text-white border-canvas-text'
-                      : 'bg-white text-canvas-text border-canvas-border'
+                      ? 'bg-neon-magenta/10 text-neon-magenta border-neon-magenta/30'
+                      : 'bg-[#0a0a0a] text-[#444] border-[#222]'
                   }`}
                 >
                   I
@@ -357,18 +356,17 @@ export function LayersTab() {
 
           {selected.type === 'shape' && (
             <>
-              {/* Shape type selector */}
               <div>
-                <span className="text-[10px] text-canvas-muted block mb-2">形状类型</span>
+                <span className="text-[10px] text-[#444] font-display tracking-wider block mb-2">形状类型</span>
                 <div className="grid grid-cols-4 gap-2">
                   {(['rectangle', 'circle', 'triangle', 'star'] as ShapeType[]).map((st) => (
                     <button
                       key={st}
                       onClick={() => updateElement(selected.id, { shapeType: st, borderRadius: st === 'circle' ? 50 : 0 })}
-                      className={`p-2 text-[10px] rounded-xl border transition-all flex items-center justify-center space-x-1 ${
+                      className={`p-2 text-[10px] rounded-lg border transition-all flex items-center justify-center space-x-1 font-display tracking-wider ${
                         selected.shapeType === st
-                          ? 'border-canvas-text bg-canvas-text text-white'
-                          : 'border-canvas-border bg-white'
+                          ? 'border-neon-magenta/40 bg-neon-magenta/10 text-neon-magenta'
+                          : 'border-[#1a1a1a] bg-[#0a0a0a] text-[#444]'
                       }`}
                     >
                       {st === 'rectangle' && <Square className="w-3 h-3" />}
@@ -383,16 +381,16 @@ export function LayersTab() {
 
               <div className="grid grid-cols-2 gap-2">
                 <label className="block space-y-1">
-                  <span className="text-[10px] text-canvas-muted">颜色</span>
+                  <span className="text-[10px] text-[#444] font-display tracking-wider">颜色</span>
                   <input
                     type="color"
                     value={selected.color}
                     onChange={(e) => updateElement(selected.id, { color: e.target.value })}
-                    className="w-full h-[34px] bg-white border border-canvas-border rounded-xl"
+                    className="w-full h-[34px] bg-[#0a0a0a] border border-[#222] rounded-lg"
                   />
                 </label>
                 <label className="block space-y-1">
-                  <span className="text-[10px] text-canvas-muted">透明度</span>
+                  <span className="text-[10px] text-[#444] font-display tracking-wider">透明度</span>
                   <input
                     type="range"
                     min="0.1"
@@ -406,7 +404,7 @@ export function LayersTab() {
               </div>
               {selected.shapeType === 'rectangle' && (
                 <label className="block space-y-1">
-                  <span className="text-[10px] text-canvas-muted">圆角</span>
+                  <span className="text-[10px] text-[#444] font-display tracking-wider">圆角</span>
                   <input
                     type="range"
                     min="0"
@@ -421,7 +419,7 @@ export function LayersTab() {
           )}
 
           <label className="block space-y-1">
-            <span className="text-[10px] text-canvas-muted">旋转角度</span>
+            <span className="text-[10px] text-[#444] font-display tracking-wider">旋转角度</span>
             <input
               type="range"
               min="-180"

@@ -15,9 +15,9 @@ export default function App() {
   }, [exportImage]);
 
   return (
-    <div className="min-h-screen bg-canvas-bg text-canvas-text font-sans antialiased flex flex-col selection:bg-black selection:text-white">
+    <div className="min-h-screen bg-canvas-bg text-canvas-text flex flex-col selection:bg-neon-cyan selection:text-black">
       <Header onExport={handleExport} />
-      <main className="flex-1 flex flex-col lg:flex-row p-4 sm:p-6 lg:p-8 gap-4 sm:gap-6 lg:gap-8 max-w-[1600px] w-full mx-auto">
+      <main className="flex-1 flex flex-col items-center px-4 sm:px-8 pb-8">
         <CanvasArea />
         <ControlPanel />
       </main>

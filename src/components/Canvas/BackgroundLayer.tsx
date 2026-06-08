@@ -5,11 +5,7 @@ export function BackgroundLayer() {
 
   if (!originalImageUrl) {
     return (
-      <div className="absolute inset-0 z-10 bg-gradient-to-br from-[#D4E2D5] to-[#E9CCD2] flex items-center justify-center overflow-hidden rounded-2xl">
-        <p className="text-xs text-canvas-muted/60 font-mono uppercase tracking-widest">
-          上传图片开始创作
-        </p>
-      </div>
+      <div className="absolute inset-0 z-10 bg-[#0a0a0a] flex items-center justify-center overflow-hidden rounded-2xl" />
     );
   }
 
